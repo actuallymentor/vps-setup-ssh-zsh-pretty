@@ -24,7 +24,8 @@ z8BChVR4CppSsU3ZaoQbQ/p3X43ZfBYxVdM0WXiekGQDqNa4/eUYk2sxTydQ3eyX
 F4v990tk4dJUjCwTkXYkYuBDzhkz89+JAQMJ3o1HPV1NHyUD7nCkIzQp7GH5hzYw
 s7NVQTjhrDY+BO8ZWRo5uu8noWVuUc+fHznkpufkeWDG+m3BD/BR
 ---- END SSH2 PUBLIC KEY ----' >> ~/.ssh/authorized_keys
-sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/g' /etc/ssh/sshd_config
-service ssh restart
+sudo sudo sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/g' /etc/ssh/sshd_config
+sudo sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/g' /etc/ssh/sshd_config
+sudo service ssh restart
 
 sudo reboot
