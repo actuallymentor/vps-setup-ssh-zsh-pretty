@@ -1,14 +1,16 @@
 #!/bin/bash
 
-echo "Server ip?"
+echo "Server ip/address?"
 read serverip
-echo "ssh key loaction?"
+echo "List og .ssh:"
+ls ~/.ssh
+echo "ssh key path?"
 read sshkey
 
 # Copy setup script
-scp ./shell.sh root@$serverip:~
-scp ./ssh.sh root@$serverip:~
-scp ./upgrade.sh root@$serverip:~
-
-cat ~/.ssh/sshkey | ssh root@$serverip "mkdir -p ~/.ssh && cat >>  ~/.ssh/authorized_keys"
+echo "Uploading scripts"
+scp ./shell.sh ./ssh.sh ./upgrade.sh root@$serverip:~
+echo "Uploading ssh keys"
+cat "$sshkey" | ssh root@$serverip "mkdir -p ~/.ssh && cat >>  ~/.ssh/authorized_keys"
+echo "Running scripts"
 ssh root@$serverip "bash ~/ssh.sh && bash shell.sh"
