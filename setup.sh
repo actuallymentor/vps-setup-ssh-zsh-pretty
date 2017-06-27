@@ -16,7 +16,6 @@ source $ZSH/oh-my-zsh.sh
 #  Set up ssh
 mkdir -p ~/.ssh
 echo '---- BEGIN SSH2 PUBLIC KEY ----
-Comment: "imported-openssh-key"
 AAAAB3NzaC1yc2EAAAADAQABAAABAQDQIPEEZTyUasFtiMWEpW0da1FuhK1ZSQLB
 SRdy4S6Mm4WEDA9Xu2rRISbpwnEQ4Y/js6dUtVOlubz0KtNKyWyiuoD0ugwAOZ3y
 29mtGUlLIJ00cNa1XdVQEUVYe+EB8NwI3pp8Pn0L2UX/RmsB7nMvBMhx/JsSoMiy
