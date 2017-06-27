@@ -15,14 +15,12 @@ source $ZSH/oh-my-zsh.sh
 
 #  Set up ssh
 mkdir -p ~/.ssh
-echo '---- BEGIN SSH2 PUBLIC KEY ----
-AAAAB3NzaC1yc2EAAAADAQABAAABAQDQIPEEZTyUasFtiMWEpW0da1FuhK1ZSQLB
-SRdy4S6Mm4WEDA9Xu2rRISbpwnEQ4Y/js6dUtVOlubz0KtNKyWyiuoD0ugwAOZ3y
-29mtGUlLIJ00cNa1XdVQEUVYe+EB8NwI3pp8Pn0L2UX/RmsB7nMvBMhx/JsSoMiy
-z8BChVR4CppSsU3ZaoQbQ/p3X43ZfBYxVdM0WXiekGQDqNa4/eUYk2sxTydQ3eyX
-F4v990tk4dJUjCwTkXYkYuBDzhkz89+JAQMJ3o1HPV1NHyUD7nCkIzQp7GH5hzYw
-s7NVQTjhrDY+BO8ZWRo5uu8noWVuUc+fHznkpufkeWDG+m3BD/BR
----- END SSH2 PUBLIC KEY ----' >> ~/.ssh/authorized_keys
+echo 'AAAAB3NzaC1yc2EAAAADAQABAAABAQDQIPEEZTyUasFtiMWEpW0da1FuhK1ZSQLBSRdy4S
+6Mm4WEDA9Xu2rRISbpwnEQ4Y/js6dUtVOlubz0KtNKyWyiuoD0ugwAOZ3y29mtGUlLIJ00
+cNa1XdVQEUVYe+EB8NwI3pp8Pn0L2UX/RmsB7nMvBMhx/JsSoMiyz8BChVR4CppSsU3Zao
+QbQ/p3X43ZfBYxVdM0WXiekGQDqNa4/eUYk2sxTydQ3eyXF4v990tk4dJUjCwTkXYkYuBD
+zhkz89+JAQMJ3o1HPV1NHyUD7nCkIzQp7GH5hzYws7NVQTjhrDY+BO8ZWRo5uu8noWVuUc
++fHznkpufkeWDG+m3BD/BR' >> ~/.ssh/authorized_keys
 sudo sudo sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/g' /etc/ssh/sshd_config
 sudo sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/g' /etc/ssh/sshd_config
 sudo service ssh restart
