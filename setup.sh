@@ -7,7 +7,7 @@ sudo apt update
 sudo apt upgrade -y
 
 # Install zsh and highlighting
-sudo apt install zsh -y
+apt install zsh -y
 wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O - | zsh
 chsh -s `which zsh`
 mkdir -p ~/.oh-my-zsh/custom/themes/
