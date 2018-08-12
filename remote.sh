@@ -2,9 +2,9 @@
 
 echo "Server ip/address?"
 read serverip
-echo "List og .ssh:"
+echo "List of .ssh:"
 ls ~/.ssh
-echo "ssh key path?"
+echo "public ssh key path? (full path)"
 read sshkey
 
 # Copy setup script
