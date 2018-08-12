@@ -37,3 +37,6 @@ Unattended-Upgrade::Automatic-Reboot "true";
 Unattended-Upgrade::Automatic-Reboot-Time "02:00";
 ' > /etc/apt/apt.conf.d/20auto-upgrades
 service unattended-upgrades restart
+
+# Reboot because of all the updates
+reboot
