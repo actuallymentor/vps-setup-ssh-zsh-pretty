@@ -1,10 +1,17 @@
 #!/bin/bash
 
-# Exit if erroe
+# Exit if error
 set -e
 
-sudo apt update
-sudo apt upgrade -y
+# SSH Setup
+mkdir -p ~/.ssh
+cat ./key.pub >> ~/.ssh/authorized_keys
+sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/g' /etc/ssh/sshd_config
+sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/g' /etc/ssh/sshd_config
+service sshd reload
+
+# Update repos
+apt update
 
 # Install zsh and highlighting
 apt install zsh -y
@@ -18,9 +25,15 @@ plugins=(git)
 source $ZSH/oh-my-zsh.sh
 ' >> ~/.zshrc
 
-# SSH Setup
-mkdir -p ~/.ssh
-cat ./key.pub >> ~/.ssh/authorized_keys
-sed -i 's/#AuthorizedKeysFile/AuthorizedKeysFile/g' /etc/ssh/sshd_config
-sed -i 's/PermitRootLogin yes/PermitRootLogin without-password/g' /etc/ssh/sshd_config
-service sshd reload
+# Upgrade all the things
+apt upgrade -y
+
+# Automatic updates
+apt install unattended-upgrades -y
+echo -e '
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+' > /etc/apt/apt.conf.d/20auto-upgrades
+service unattended-upgrades restart
