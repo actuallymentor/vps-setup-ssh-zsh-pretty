@@ -15,5 +15,8 @@ bash ./02-autoupdate.sh
 ## Install and configure ZSH
 bash ./03-zsh.sh
 
+## Add swap space (1 + size of ram)
+bash ./04-swap.sh
+
 # Reboot because of all the updates
 reboot
