@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Settings
+AUTO_REBOOT_AT_UPGRADE='false'
+SSH_PORT=4242
+
 # Exit if error
 set -e
 
@@ -17,6 +21,9 @@ bash ./03-zsh.sh
 
 ## Add swap space (1 + size of ram)
 bash ./04-swap.sh
+
+## Add basic security measures
+bash ./05-security.sh
 
 # Reboot because of all the updates
 reboot
