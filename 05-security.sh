@@ -1,23 +1,4 @@
-#########################
-# Firewall
-# https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#firewall-with-ufw-uncomplicated-firewall
-#########################
-sudo apt install -y ufw
 
-# Disallow by default
-sudo ufw default deny outgoing comment 'deny all outgoing traffic'
-sudo ufw default deny incoming comment 'deny all incoming traffic'
-
-# Allow specific things
-sudo ufw allow 22/tcp comment 'Allow ssh'
-sudo ufw allow out 53 comment 'allow DNS calls out'
-sudo ufw allow out 123 comment 'allow NTP out' # For timekeeping, see below
-sudo ufw allow out http comment 'allow HTTP traffic out' # apt is likely to use these
-sudo ufw allow out https comment 'allow HTTPS traffic out' # apt is likely to use these
-
-# Enable and log
-sudo ufw enable
-sudo ufw status numbered
 
 #########################
 # Timekeeping
@@ -63,3 +44,24 @@ filter = sshd
 logpath = %(sshd_log)s
 maxretry = 5
 " > /etc/fail2ban/jail.d/ssh.local
+
+#########################
+# Firewall
+# https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#firewall-with-ufw-uncomplicated-firewall
+#########################
+sudo apt install -y ufw
+
+# Disallow by default
+sudo ufw default deny outgoing comment 'deny all outgoing traffic'
+sudo ufw default deny incoming comment 'deny all incoming traffic'
+
+# Allow specific things
+sudo ufw allow 22/tcp comment 'Allow ssh'
+sudo ufw allow out 53 comment 'allow DNS calls out'
+sudo ufw allow out 123 comment 'allow NTP out' # For timekeeping, see below
+sudo ufw allow out http comment 'allow HTTP traffic out' # apt is likely to use these
+sudo ufw allow out https comment 'allow HTTPS traffic out' # apt is likely to use these
+
+# Enable and log
+sudo ufw enable
+sudo ufw status numbered
