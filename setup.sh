@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Settings
-AUTO_REBOOT_AT_UPGRADE='false'
-SSH_PORT=4242
+export AUTO_REBOOT_AT_UPGRADE='false'
+export SSH_PORT=4242
 
 # Exit if error
 set -e
