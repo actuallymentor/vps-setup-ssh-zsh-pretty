@@ -11,7 +11,7 @@ sudo sed -i -r -e "s/^((server|pool).*)/# \1         # commented by $(whoami) on
 echo -e "\npool pool.ntp.org iburst         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ntp.conf
 
 # Disable built in timekeeping
-sudo timedatectl set-ntp no
+sudo timedatectl set-ntp no || echo "Timedatectl disabled"
 timedatectl
 
 # Restart and statuses

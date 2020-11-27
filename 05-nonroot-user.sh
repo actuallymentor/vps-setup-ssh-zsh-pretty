@@ -3,7 +3,7 @@
 ################
 
 # Create new user with sudo privileges
-adduser --gecos "" $NONROOT_USERNAME
+adduser --disabled-password --gecos "" $NONROOT_USERNAME
 usermod -aG sudo $NONROOT_USERNAME
 echo "$NONROOT_USERNAME:$NONROOT_PASSWORD" | chpasswd
 
