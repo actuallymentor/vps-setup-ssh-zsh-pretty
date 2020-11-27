@@ -17,6 +17,9 @@ read -s NONROOT_PASSWORD
 # Exit if error
 set -e
 
+# Fix common networking error
+sudo echo "127.0.0.1 $(hostname)" >> /etc/hosts
+
 ## SSH key
 source ./00-ssh.sh
 

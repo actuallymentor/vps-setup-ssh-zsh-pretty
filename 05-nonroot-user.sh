@@ -3,15 +3,15 @@
 ################
 
 # Create new user with sudo privileges
-adduser --disabled-password --gecos "" $NONROOT_USERNAME
-usermod -aG sudo $NONROOT_USERNAME
-echo "$NONROOT_USERNAME:$NONROOT_PASSWORD" | chpasswd
+sudo adduser --disabled-password --gecos "" $NONROOT_USERNAME
+sudo usermod -aG sudo $NONROOT_USERNAME
+echo "$NONROOT_USERNAME:$NONROOT_PASSWORD" | sudo chpasswd
 
 # Set zsh as default shell
-chsh -s `which zsh` $NONROOT_USERNAME
+sudo chsh -s `which zsh` $NONROOT_USERNAME
 
 # Oh my zsh for subuser
-ZSH=/home/$NONROOT_USERNAME/.oh-my-zsh installOhMyZSH /home/$NONROOT_USERNAME
+installOhMyZSH $NONROOT_USERNAME
 
 # Deny user SSH access
 echo "DenyUsers $username" >> /etc/ssh/sshd_config
