@@ -55,11 +55,17 @@ sudo ufw default deny incoming comment 'deny all incoming traffic'
 
 # Allow specific things
 sudo ufw allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
+sudo ufw deny 22/tcp comment 'Deny default SSH port'
 sudo ufw allow out 53 comment 'allow DNS calls out'
 sudo ufw allow out 123 comment 'allow NTP out' # For timekeeping, see below
 sudo ufw allow out http comment 'allow HTTP traffic out' # apt is likely to use these
 sudo ufw allow out https comment 'allow HTTPS traffic out' # apt is likely to use these
 
 # Enable and log
-sudo ufw enable
 sudo ufw status numbered
+echo -e "\nUFW will now enable, your current tunnel will break because your SSH port is now $SSH_PORT"
+echo -e "You can log back in using the -p $SSH_PORT flag in your command"
+echo -e "Press any key to continue"
+read
+
+sudo ufw enable

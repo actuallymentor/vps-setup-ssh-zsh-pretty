@@ -32,8 +32,8 @@ source ./03-zsh.sh
 ## Add swap space (1 + size of ram)
 source ./04-swap.sh
 
-## Add basic security measures
-source ./05-security.sh
+## Add a nonroot user
+source ./05-nonroot-user.sh
 
-# Reboot because of all the updates
-reboot
+## Add basic security measures
+source ./06-security.sh

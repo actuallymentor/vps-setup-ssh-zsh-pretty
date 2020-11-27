@@ -1,17 +1,18 @@
-# Size of physical RAm plus 1
+# Size of physical RAM plus 1
 ramsize=$(echo $((1 + $(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024 * 1024))))
 unit=G
 
-# sudo fallocate -l 1G /swapfile
+# Alocate swap space
 sudo fallocate -l "$ramsize$unit" /swapfile
 
+# Set permissions
 sudo chmod 600 /swapfile
-ls -lh /swapfile
 
+# Enable swap on the /swapfile path
 sudo mkswap /swapfile
 sudo swapon /swapfile
 sudo swapon --show
 
-# PERMANENCE
+# Permanence after reboot
 sudo cp /etc/fstab /etc/fstab.bak
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab

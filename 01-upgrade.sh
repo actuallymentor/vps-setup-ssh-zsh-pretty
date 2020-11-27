@@ -1,10 +1,10 @@
 #!/bin/bash
 
-apt-get update
-apt-get install -y apt
+sudo apt-get update
+sudo apt-get install -y apt
 
 # Upgrade all the things
-apt update
-apt upgrade -y
-apt dist-upgrade -y
-apt autoremove -y
+sudo apt update
+sudo apt upgrade -y
+sudo apt dist-upgrade -y
+sudo apt autoremove -y
