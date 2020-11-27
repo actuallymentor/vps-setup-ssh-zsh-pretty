@@ -30,10 +30,6 @@ function installOhMyZSH() {
 	" > $userhome/.zshrc
 
 
-	cat $userhome/.zshrc
-	source $userhome/.zshrc
-
-
 }
 
 installOhMyZSH $(whoami)
