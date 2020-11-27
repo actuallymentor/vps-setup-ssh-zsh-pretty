@@ -12,6 +12,7 @@ sudo chsh -s `which zsh` $NONROOT_USERNAME
 
 # Oh my zsh for subuser
 installOhMyZSH $NONROOT_USERNAME
+sudo chown -R $NONROOT_USERNAME $( eval echo "~$NONROOT_USERNAME" )
 
 # Deny user SSH access
 echo "DenyUsers $username" >> /etc/ssh/sshd_config
