@@ -1,29 +1,39 @@
 #!/bin/bash
 
 # Settings
-export AUTO_REBOOT_AT_UPGRADE='false'
-export SSH_PORT=4242
+echo "Do you want to automatically reboot after an auto-upgrade? [true/false]"
+read AUTO_REBOOT_AT_UPGRADE
+
+echo "What SSH port do you want to configure?"
+read SSH_PORT
+
+echo "What username should the non root sudo user have?"
+read NONROOT_USERNAME
+
+echo "What password should this user have?"
+read -s NONROOT_PASSWORD
+
 
 # Exit if error
 set -e
 
 ## SSH key
-bash ./00-ssh.sh
+source ./00-ssh.sh
 
 ## Upgrade full system
-bash ./01-upgrade.sh
+source ./01-upgrade.sh
 
 ## Enable autoupdates with purging
-bash ./02-autoupdate.sh
+source ./02-autoupdate.sh
 
 ## Install and configure ZSH
-bash ./03-zsh.sh
+source ./03-zsh.sh
 
 ## Add swap space (1 + size of ram)
-bash ./04-swap.sh
+source ./04-swap.sh
 
 ## Add basic security measures
-bash ./05-security.sh
+source ./05-security.sh
 
 # Reboot because of all the updates
 reboot

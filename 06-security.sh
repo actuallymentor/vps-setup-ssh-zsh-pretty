@@ -1,5 +1,3 @@
-
-
 #########################
 # Timekeeping
 # https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#ntp-client
@@ -56,7 +54,7 @@ sudo ufw default deny outgoing comment 'deny all outgoing traffic'
 sudo ufw default deny incoming comment 'deny all incoming traffic'
 
 # Allow specific things
-sudo ufw allow 22/tcp comment 'Allow ssh'
+sudo ufw allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
 sudo ufw allow out 53 comment 'allow DNS calls out'
 sudo ufw allow out 123 comment 'allow NTP out' # For timekeeping, see below
 sudo ufw allow out http comment 'allow HTTP traffic out' # apt is likely to use these
