@@ -53,9 +53,12 @@ sudo apt install -y ufw
 sudo ufw default deny outgoing comment 'deny all outgoing traffic'
 sudo ufw default deny incoming comment 'deny all incoming traffic'
 
+if [ "$SSH_PORT" != "22" ]; then
+	sudo ufw deny 22/tcp comment 'Deny default SSH port'
+fi
+
 # Allow specific things
 sudo ufw allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
-sudo ufw deny 22/tcp comment 'Deny default SSH port'
 sudo ufw allow out 53 comment 'allow DNS calls out'
 sudo ufw allow out 123 comment 'allow NTP out' # For timekeeping, see below
 sudo ufw allow out http comment 'allow HTTP traffic out' # apt is likely to use these

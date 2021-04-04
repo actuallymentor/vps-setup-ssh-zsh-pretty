@@ -15,4 +15,6 @@ installOhMyZSH $NONROOT_USERNAME
 sudo chown -R $NONROOT_USERNAME $( eval echo "~$NONROOT_USERNAME" )
 
 # Deny user SSH access
-echo "DenyUsers $username" >> /etc/ssh/sshd_config
+if [ "$NONROOT_SSH" = "n" ]; then
+	echo "DenyUsers $username" >> /etc/ssh/sshd_config
+fi

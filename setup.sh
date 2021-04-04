@@ -4,14 +4,19 @@
 echo "Do you want to automatically reboot after an auto-upgrade? [true/false]"
 read AUTO_REBOOT_AT_UPGRADE
 
-echo "What SSH port do you want to configure?"
+echo "What SSH port do you want to configure? (default 22)"
 read SSH_PORT
+SSH_PORT=${SSH_PORT:-22}
 
 echo "What username should the non root sudo user have?"
 read NONROOT_USERNAME
 
 echo "What password should this user have?"
 read -s NONROOT_PASSWORD
+
+echo "Should the nonroot user be able to SSH into the machine? [y/n] (default y)"
+read NONROOT_SSH
+NONROOT_SSH=${NONROOT_SSH:-y}
 
 
 # Exit if error
