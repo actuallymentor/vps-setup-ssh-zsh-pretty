@@ -14,5 +14,5 @@ sed -i 's/ChallengeResponseAuthentication yes/ChallengeResponseAuthentication no
 sed -i 's/#\{0,1\}PasswordAuthentication yes/PasswordAuthentication no/g' /etc/ssh/sshd_config
 
 # Disable root login with password
-sed -i 's/#\{0,1\}PermitRootLogin yes/PermitRootLogin without-password/g' /etc/ssh/sshd_config
+sed -i 's/#\{0,1\}PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
 service sshd reload
