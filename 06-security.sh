@@ -37,7 +37,7 @@ echo -e "
 [sshd]
 enabled = true
 banaction = ufw
-port = ssh
+port = $SSH_PORT
 filter = sshd
 logpath = %(sshd_log)s
 maxretry = 5
@@ -53,6 +53,7 @@ sudo apt install -y ufw
 sudo ufw default deny outgoing comment 'deny all outgoing traffic'
 sudo ufw default deny incoming comment 'deny all incoming traffic'
 
+# This is default behaviour, adding for verbosity
 if [ "$SSH_PORT" != "22" ]; then
 	sudo ufw deny 22/tcp comment 'Deny default SSH port'
 fi

@@ -16,5 +16,5 @@ sudo chown -R $NONROOT_USERNAME $( eval echo "~$NONROOT_USERNAME" )
 
 # Deny user SSH access
 if [ "$NONROOT_SSH" = "n" ]; then
-	echo "DenyUsers $username" >> /etc/ssh/sshd_config
+	echo "DenyUsers $NONROOT_USERNAME" >> /etc/ssh/sshd_config
 fi
