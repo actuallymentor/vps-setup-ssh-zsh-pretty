@@ -1,23 +1,39 @@
 #!/bin/bash
 
-# Settings
-echo "Do you want to automatically reboot after an auto-upgrade? [true/false]"
-read AUTO_REBOOT_AT_UPGRADE
+SILENT_INSTALL=$1
 
-echo "What SSH port do you want to configure? (default 22)"
-read SSH_PORT
-SSH_PORT=${SSH_PORT:-22}
+# Check if a silent install was requested
+if [[ -v SILENT_INSTALL ]]; then
+	echo "Silent install requested, using defaults"
+else
+	# Settings
+	echo "Do you want to automatically reboot after an auto-upgrade? [true/false]"
+	read AUTO_REBOOT_AT_UPGRADE
 
-echo "What username should the non root sudo user have?"
-read NONROOT_USERNAME
+	echo "What SSH port do you want to configure? (default 22)"
+	read SSH_PORT
+	
 
-echo "What password should this user have?"
-read -s NONROOT_PASSWORD
+	echo "What username should the non root sudo user have?"
+	read NONROOT_USERNAME
 
-echo "Should the nonroot user be able to SSH into the machine? [y/n] (default y)"
-read NONROOT_SSH
+	echo "What password should this user have?"
+	read -s NONROOT_PASSWORD
+
+	echo "Should the nonroot user be able to SSH into the machine? [y/n] (default y)"
+	read NONROOT_SSH
+
+	echo "Should I set up a restrictive firewall? [y/n] (default n)"
+	read FIREWALL
+
+fi
+
+# Set defaults
+AUTO_REBOOT_AT_UPGRADE=${AUTO_REBOOT_AT_UPGRADE:-true}
+NONROOT_USERNAME=${NONROOT_USERNAME:-toor}
 NONROOT_SSH=${NONROOT_SSH:-y}
-
+SSH_PORT=${SSH_PORT:-22}
+FIREWALL=${FIREWALL:-n}
 
 # Exit if error
 set -e
