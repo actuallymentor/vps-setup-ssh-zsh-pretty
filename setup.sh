@@ -12,7 +12,6 @@ else
 
 	echo "What SSH port do you want to configure? (default 22)"
 	read SSH_PORT
-	
 
 	echo "What username should the non root sudo user have?"
 	read NONROOT_USERNAME
@@ -56,8 +55,12 @@ source ./03-zsh.sh
 ## Add swap space (1 + size of ram)
 source ./04-swap.sh
 
-## Add a nonroot user
-source ./05-nonroot-user.sh
+if [[ -v SILENT_INSTALL ]]; then
+	echo "Silent install does NOT create nonroot user"
+else
+	## Add a nonroot user
+	source ./05-nonroot-user.sh
+fi
 
 ## Add basic security measures
 source ./06-security.sh
