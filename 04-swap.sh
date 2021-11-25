@@ -3,6 +3,9 @@ swaploc=/swapfile
 ramsize=$(echo $((1 + $(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024 * 1024))))
 unit=G
 
+# Disable swap in case it is in use
+sudo swapoff -a
+
 # Alocate swap space
 sudo fallocate -l "$ramsize$unit" $swaploc
 

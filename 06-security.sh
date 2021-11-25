@@ -1,3 +1,5 @@
+echo "Configuring security measures"
+
 #########################
 # Timekeeping
 # https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#ntp-client
@@ -11,8 +13,8 @@ sudo sed -i -r -e "s/^((server|pool).*)/# \1         # commented by $(whoami) on
 echo -e "\npool pool.ntp.org iburst         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ntp.conf
 
 # Disable built in timekeeping
-sudo timedatectl set-ntp no || echo "Timedatectl disabled"
-timedatectl
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-time-synchronization-on-ubuntu-20-04
+sudo timedatectl set-ntp on || echo "Timedatectl disabled"
 
 # Restart and statuses
 sudo service ntp restart
@@ -77,3 +79,5 @@ if [ "$FIREWALL" != "n" ]; then
 	sudo ufw enable
 
 fi
+
+echo "Security config complete"

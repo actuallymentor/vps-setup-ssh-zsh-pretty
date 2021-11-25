@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Running package upgrade"
+
 # Update repos
 sudo apt-get update
 
@@ -23,3 +25,5 @@ else
 	echo "Nother process is installing through apt-get, exiting"
 	exit 1
 fi
+
+echo "Package upgrade done"

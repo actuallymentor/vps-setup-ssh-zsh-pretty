@@ -2,6 +2,8 @@
 # User setup
 ################
 
+echo "Creating nonroot user"
+
 # Create new user with sudo privileges
 sudo adduser --disabled-password --gecos "" $NONROOT_USERNAME
 sudo usermod -aG sudo $NONROOT_USERNAME
@@ -18,3 +20,5 @@ sudo chown -R $NONROOT_USERNAME $( eval echo "~$NONROOT_USERNAME" )
 if [ "$NONROOT_SSH" = "n" ]; then
 	echo "DenyUsers $NONROOT_USERNAME" >> /etc/ssh/sshd_config
 fi
+
+echo "Nonroot user created"

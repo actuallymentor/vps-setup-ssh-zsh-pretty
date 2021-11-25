@@ -13,6 +13,12 @@ bash setup.sh
 cd .. && rm -rf ./setup
 ```
 
+To run this script silently (skips firewall and nonroot user), pass `true` as the first argument:
+
+```
+bash setup.sh true
+```
+
 ## Important notes:
 
 1. This script assumes default config files for `sshd` and `unattended-upgrades`
