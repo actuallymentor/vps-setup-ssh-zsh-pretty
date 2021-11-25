@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ecno "Configuring auto update"
+echo "Configuring auto update"
 
 # Automatic updates
 apt install unattended-upgrades update-notifier-common -y
