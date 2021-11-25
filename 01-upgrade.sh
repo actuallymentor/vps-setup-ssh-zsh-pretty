@@ -23,6 +23,9 @@ fi
 
 # Upgrade all the things
 if sudo apt-get upgrade --simulate; then
+	if [[ -v SILENT_INSTALL ]]; then
+		DEBIAN_FRONTEND=noninteractive
+	fi
 	sudo apt update
 	sudo apt upgrade -y
 	sudo apt dist-upgrade -y
