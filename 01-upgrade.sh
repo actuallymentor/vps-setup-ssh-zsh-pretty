@@ -2,6 +2,12 @@
 
 echo "Running package upgrade"
 
+# Wait for package lock
+while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do
+	echo "Another package script is running, waiting for it to exit..."
+	sleep 10
+done
+
 # Update repos
 sudo apt-get update
 
