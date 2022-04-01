@@ -55,7 +55,7 @@ source ./03-zsh.sh
 ## Add swap space (1 + size of ram)
 source ./04-swap.sh
 
-if [[ -v SILENT_INSTALL ]]; then
+if [ "$SILENT_INSTALL" ]; then
 	echo "Silent install does NOT create nonroot user"
 else
 	## Add a nonroot user
