@@ -3,7 +3,7 @@
 SILENT_INSTALL=$1
 
 # Check if a silent install was requested
-if [[ -v SILENT_INSTALL ]]; then
+if [ "$SILENT_INSTALL" ]; then
 	echo "Silent install requested, using defaults"
 else
 	# Settings
