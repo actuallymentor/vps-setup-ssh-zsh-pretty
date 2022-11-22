@@ -17,6 +17,12 @@ sudo mkswap $swaploc
 sudo swapon $swaploc
 sudo swapon --show
 
+# Set swappiness to be lower
+sudo sysctl vm.swappiness=6
+sudo sysctl vm.vfs_cache_pressure=10
+sudo echo "vm.swappiness=6
+vm.vfs_cache_pressure=10" >> /etc/sysctl.conf
+
 # Permanence after reboot
 sudo cp /etc/fstab /etc/fstab.bak
 echo "$swaploc none swap sw 0 0" | sudo tee -a /etc/fstab

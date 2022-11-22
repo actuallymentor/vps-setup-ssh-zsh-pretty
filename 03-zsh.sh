@@ -12,6 +12,7 @@ function installOhMyZSH() {
 	echo "Installing Oh My ZSH as $1 in $ZSH"
 
 	# Backup old zshrc and create new one
+	mkdir -p $ZSH
 	mv $userhome/.zshrc $userhome/.zshrc.bak || echo "no existing config"
 	echo "Creating ~/.zshrc"
 	echo -e "
