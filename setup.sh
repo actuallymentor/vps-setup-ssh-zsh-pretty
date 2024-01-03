@@ -22,8 +22,9 @@ else
 	echo "Should the nonroot user be able to SSH into the machine? [y/n] (default y)"
 	read NONROOT_SSH
 
-	echo "Should I set up a restrictive firewall? [y/n] (default n)"
+	echo "Should I set up a firewall? [incoming/bidirectional/n] (default n)"
 	read FIREWALL
+
 
 fi
 
@@ -33,6 +34,49 @@ NONROOT_USERNAME=${NONROOT_USERNAME:-toor}
 NONROOT_SSH=${NONROOT_SSH:-y}
 SSH_PORT=${SSH_PORT:-22}
 FIREWALL=${FIREWALL:-n}
+
+# validate that all inputs are correct
+if [ "$AUTO_REBOOT_AT_UPGRADE" != "true" ] && [ "$AUTO_REBOOT_AT_UPGRADE" != "false" ]; then
+	echo "AUTO_REBOOT_AT_UPGRADE must be true or false"
+	exit 1
+fi
+
+# Check if the non-route, SSH user should be able to SSH into the machine
+if [ "$NONROOT_SSH" != "y" ] && [ "$NONROOT_SSH" != "n" ]; then
+	echo "NONROOT_SSH must be y or n"
+	exit 1
+fi
+
+# Check if the firewall settings are correct
+if [ "$FIREWALL" != "incoming" ] && [ "$FIREWALL" != "bidirectional" ] && [ "$FIREWALL" != "n" ]; then
+	echo "FIREWALL must be incoming, bidirectional, or n"
+	exit 1
+fi
+
+# Check if the SSH port is a numberq
+if ! [[ "$SSH_PORT" =~ ^[0-9]+$ ]]; then
+	echo "SSH_PORT must be a number"
+	exit 1
+fi
+
+# Check if the SSH port is between 1 and 65535
+if [ "$SSH_PORT" -lt 1 ] || [ "$SSH_PORT" -gt 65535 ]; then
+	echo "SSH_PORT must be between 1 and 65535"
+	exit 1
+fi
+
+# Check if the nonroot user is alphanumeric
+if ! [[ "$NONROOT_USERNAME" =~ ^[a-zA-Z0-9]+$ ]]; then
+	echo "NONROOT_USERNAME must be alphanumeric"
+	exit 1
+fi
+
+# Check if the nonroot password is alphanumeric
+if ! [[ "$NONROOT_PASSWORD" =~ ^[a-zA-Z0-9]+$ ]]; then
+	echo "NONROOT_PASSWORD must be alphanumeric"
+	exit 1
+fi
+
 
 # Exit if error
 set -e

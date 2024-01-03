@@ -53,21 +53,32 @@ if [ "$FIREWALL" != "n" ]; then
 	
 	sudo apt install -y ufw
 
-	# Disallow by default
-	sudo ufw default deny outgoing comment 'deny all outgoing traffic'
-	sudo ufw default deny incoming comment 'deny all incoming traffic'
+	# If the firewall is set to buy directional block outgoing and incoming
+	if [ "$FIREWALL" = "bidirectional" ]; then
+		# Disallow by default
+		sudo ufw default deny outgoing comment 'deny all outgoing traffic'
+		sudo ufw default deny incoming comment 'deny all incoming traffic' 
+		# Allow specific things
+		sudo ufw allow out 53 comment 'allow DNS calls out'
+		sudo ufw allow out 123 comment 'allow NTP out' # For timekeeping, see below
+		sudo ufw allow out http comment 'allow HTTP traffic out' # apt is likely to use these
+		sudo ufw allow out https comment 'allow HTTPS traffic out' # apt is likely to use these
+	fi
+
+	# If the firewall is set to incoming, block incoming only
+	if [ "$FIREWALL" = "incoming" ]; then
+		# Disallow by default
+		sudo ufw default deny incoming comment 'deny all incoming traffic'
+	fi
 
 	# This is default behaviour, adding for verbosity
 	if [ "$SSH_PORT" != "22" ]; then
 		sudo ufw deny 22/tcp comment 'Deny default SSH port'
 	fi
 
-	# Allow specific things
+	# Allow ssh access
 	sudo ufw allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
-	sudo ufw allow out 53 comment 'allow DNS calls out'
-	sudo ufw allow out 123 comment 'allow NTP out' # For timekeeping, see below
-	sudo ufw allow out http comment 'allow HTTP traffic out' # apt is likely to use these
-	sudo ufw allow out https comment 'allow HTTPS traffic out' # apt is likely to use these
+	
 
 	# Enable and log
 	sudo ufw status numbered
