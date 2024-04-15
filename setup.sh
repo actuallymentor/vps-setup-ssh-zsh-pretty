@@ -65,17 +65,20 @@ if [ "$SSH_PORT" -lt 1 ] || [ "$SSH_PORT" -gt 65535 ]; then
 	exit 1
 fi
 
-# Check if the nonroot user is alphanumeric
-if ! [[ "$NONROOT_USERNAME" =~ ^[a-zA-Z0-9]+$ ]]; then
-	echo "NONROOT_USERNAME must be alphanumeric"
-	exit 1
+if [ ! "$SILENT_INSTALL" ]; then
+	# Check if the nonroot user is alphanumeric
+	if ! [[ "$NONROOT_USERNAME" =~ ^[a-zA-Z0-9]+$ ]]; then
+		echo "NONROOT_USERNAME must be alphanumeric"
+		exit 1
+	fi
+
+	# Check if the nonroot password is alphanumeric
+	if ! [[ "$NONROOT_PASSWORD" =~ ^[a-zA-Z0-9]+$ ]]; then
+		echo "NONROOT_PASSWORD must be alphanumeric"
+		exit 1
+	fi
 fi
 
-# Check if the nonroot password is alphanumeric
-if ! [[ "$NONROOT_PASSWORD" =~ ^[a-zA-Z0-9]+$ ]]; then
-	echo "NONROOT_PASSWORD must be alphanumeric"
-	exit 1
-fi
 
 
 # Exit if error
