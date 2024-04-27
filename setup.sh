@@ -72,9 +72,9 @@ if [ ! "$SILENT_INSTALL" ]; then
 		exit 1
 	fi
 
-	# Check if the nonroot password is alphanumeric
-	if ! [[ "$NONROOT_PASSWORD" =~ ^[a-zA-Z0-9]+$ ]]; then
-		echo "NONROOT_PASSWORD must be alphanumeric"
+	# Check if the nonroot password is valid
+	if [ ${#NONROOT_PASSWORD} -lt 8 ]; then
+		echo "NONROOT_PASSWORD must be at least 8 characters"
 		exit 1
 	fi
 fi
