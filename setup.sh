@@ -25,6 +25,8 @@ else
 	echo "Should I set up a firewall? [incoming/bidirectional/n] (default n)"
 	read FIREWALL
 
+	echo "Should I install things noninteractively? [y/n] (default y)"
+	read NONINTERACTIVE
 
 fi
 
@@ -34,6 +36,7 @@ NONROOT_USERNAME=${NONROOT_USERNAME:-toor}
 NONROOT_SSH=${NONROOT_SSH:-y}
 SSH_PORT=${SSH_PORT:-22}
 FIREWALL=${FIREWALL:-n}
+NONINTERACTIVE=${NONINTERACTIVE:-y}
 
 # validate that all inputs are correct
 if [ "$AUTO_REBOOT_AT_UPGRADE" != "true" ] && [ "$AUTO_REBOOT_AT_UPGRADE" != "false" ]; then
@@ -79,7 +82,10 @@ if [ ! "$SILENT_INSTALL" ]; then
 	fi
 fi
 
-
+# Set noninteractivity if requested
+if [ "$NONINTERACTIVE" == "y" ]; then
+	export DEBIAN_FRONTEND=noninteractive
+fi
 
 # Exit if error
 set -e
