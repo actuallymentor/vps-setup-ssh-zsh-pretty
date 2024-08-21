@@ -28,11 +28,12 @@ if sudo apt-get upgrade --simulate; then
 		sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
 		sudo DEBIAN_FRONTEND=noninteractive apt dist-upgrade -y
 		sudo DEBIAN_FRONTEND=noninteractive apt autoremove -y
+	else
+		sudo apt update
+		sudo apt upgrade -y
+		sudo apt dist-upgrade -y
+		sudo apt autoremove -y
 	fi
-	sudo apt update
-	sudo apt upgrade -y
-	sudo apt dist-upgrade -y
-	sudo apt autoremove -y
 else
 	echo "Nother process is installing through apt-get, exiting"
 	exit 1
