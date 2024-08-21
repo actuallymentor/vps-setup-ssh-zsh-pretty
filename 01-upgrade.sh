@@ -24,7 +24,10 @@ fi
 # Upgrade all the things
 if sudo apt-get upgrade --simulate; then
 	if [[ -v SILENT_INSTALL ]]; then
-		export DEBIAN_FRONTEND=noninteractive
+		sudo DEBIAN_FRONTEND=noninteractive apt update
+		sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y
+		sudo DEBIAN_FRONTEND=noninteractive apt dist-upgrade -y
+		sudo DEBIAN_FRONTEND=noninteractive apt autoremove -y
 	fi
 	sudo apt update
 	sudo apt upgrade -y
