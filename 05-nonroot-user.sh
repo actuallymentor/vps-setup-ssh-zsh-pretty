@@ -4,10 +4,15 @@
 
 echo "Creating nonroot user"
 
-# Create new user with sudo privileges
-sudo adduser --disabled-password --gecos "" $NONROOT_USERNAME
-sudo usermod -aG sudo $NONROOT_USERNAME
-echo "$NONROOT_USERNAME:$NONROOT_PASSWORD" | sudo chpasswd
+# Check if $NONROOT_USERNAME user already exists
+if id "$NONROOT_USERNAME" &>/dev/null; then
+	echo "User $NONROOT_USERNAME already exists, skipping"
+else
+	# Create new user with sudo privileges
+	sudo adduser --disabled-password --gecos "" $NONROOT_USERNAME
+	sudo usermod -aG sudo $NONROOT_USERNAME
+	echo "$NONROOT_USERNAME:$NONROOT_PASSWORD" | sudo chpasswd
+fi
 
 # Set zsh as default shell
 sudo chsh -s `which zsh` $NONROOT_USERNAME
