@@ -95,7 +95,7 @@ echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
 
 # Activate sudo
 sudo -v
-(while true; do sudo -v; sleep 240; done) &
+(while true; do sudo -v; sleep 30; done) &
 SUDO_PID=$!
 
 ## SSH key
