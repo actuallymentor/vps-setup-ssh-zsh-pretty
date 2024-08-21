@@ -20,6 +20,6 @@ sed -i 's/#\{0,1\}PasswordAuthentication yes/PasswordAuthentication no/g' /etc/s
 
 # Disable root login with password
 sed -i 's/#\{0,1\}PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
-service sshd reload
+service ssh reload
 
-echo "sshd configured and restarted"
+echo "ssh configured and restarted"
