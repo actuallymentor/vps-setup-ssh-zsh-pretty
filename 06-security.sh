@@ -43,7 +43,7 @@ port = $SSH_PORT
 filter = sshd
 logpath = %(sshd_log)s
 maxretry = 5
-" > /etc/fail2ban/jail.d/ssh.local
+" | sudo tee /etc/fail2ban/jail.d/ssh.conf
 
 #########################
 # Firewall
