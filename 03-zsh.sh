@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install zsh and highlighting
-apt install zsh -y
+sudo apt install zsh -y
 chsh -s `which zsh`
 
 # Recyclable zsh install function for use here and in the nonroot user section
