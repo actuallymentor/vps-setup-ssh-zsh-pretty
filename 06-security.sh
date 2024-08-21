@@ -87,7 +87,7 @@ if [ "$FIREWALL" != "n" ]; then
 	echo -e "Press any key to continue"
 	read
 
-	sudo ufw enable
+	sudo ufw --force enable
 
 fi
 
