@@ -7,7 +7,7 @@ if [ "$SILENT_INSTALL" ]; then
 	echo "Silent install requested, using defaults"
 else
 	# Settings
-	echo "Do you want to automatically reboot after an auto-upgrade? [true/false]"
+	echo "Do you want to automatically reboot after an auto-upgrade? [true/false] (default true)"
 	read AUTO_REBOOT_AT_UPGRADE
 
 	echo "What SSH port do you want to configure? (default 22)"
@@ -22,7 +22,7 @@ else
 	echo "Should the nonroot user be able to SSH into the machine? [y/n] (default y)"
 	read NONROOT_SSH
 
-	echo "Should I set up a firewall? [incoming/bidirectional/n] (default n)"
+	echo "Should I set up a firewall? [incoming/bidirectional/n] (default incoming)"
 	read FIREWALL
 
 	echo "Should I install things noninteractively? [y/n] (default y)"
@@ -35,7 +35,7 @@ AUTO_REBOOT_AT_UPGRADE=${AUTO_REBOOT_AT_UPGRADE:-true}
 NONROOT_USERNAME=${NONROOT_USERNAME:-toor}
 NONROOT_SSH=${NONROOT_SSH:-y}
 SSH_PORT=${SSH_PORT:-22}
-FIREWALL=${FIREWALL:-n}
+FIREWALL=${FIREWALL:-incoming}
 NONINTERACTIVE=${NONINTERACTIVE:-y}
 
 # validate that all inputs are correct
