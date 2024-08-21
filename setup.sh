@@ -93,6 +93,9 @@ set -e
 # Fix common networking error
 echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
 
+# Activate sudo
+sudo -v
+
 ## SSH key
 source ./00-ssh.sh
 
