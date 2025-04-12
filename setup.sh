@@ -123,5 +123,8 @@ fi
 ## Add basic security measures
 source ./06-security.sh
 
+## Install docker
+source ./07-docker.sh
+
 ## Kill the sudo loop
 kill $SUDO_PID

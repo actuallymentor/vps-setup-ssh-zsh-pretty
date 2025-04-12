@@ -2,7 +2,7 @@
 
 # Install zsh and highlighting
 sudo apt install zsh -y
-sudo chsh -s `which zsh`
+sudo usermod -s `which zsh` `whoami`
 
 # Recyclable zsh install function for use here and in the nonroot user section
 function installOhMyZSH() {
