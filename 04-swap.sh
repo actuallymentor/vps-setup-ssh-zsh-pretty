@@ -25,4 +25,5 @@ vm.vfs_cache_pressure=10" | sudo tee -a /etc/sysctl.conf
 
 # Permanence after reboot
 sudo cp /etc/fstab /etc/fstab.bak
+sudo sed -i '/swap/d' /etc/fstab
 echo "$swaploc none swap sw 0 0" | sudo tee -a /etc/fstab
