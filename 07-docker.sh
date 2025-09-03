@@ -38,8 +38,10 @@ fi
 sudo groupadd docker &> /dev/null
 sudo usermod -aG docker $USER
 
-# Add the nonroot user to docker group
-sudo usermod -aG docker $NONROOT_USERNAME
+# Add the nonroot user to docker group if NONROOT_USERNAME is set
+if [ -n "$NONROOT_USERNAME" ]; then
+    sudo usermod -aG docker $NONROOT_USERNAME
+fi
 
 newgrp docker << EOF
     echo -e "\nStarting docker daemon\n"
