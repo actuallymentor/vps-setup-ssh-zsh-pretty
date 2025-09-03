@@ -33,7 +33,7 @@ sudo cp /etc/fstab /etc/fstab.bak
 sudo sed -i '/tmpfs/d' /etc/fstab
 
 # Make tmpfs with half the RAM size
-tmpfs_size=$(echo $(( $(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024) / 2 )))
+tmpfs_size=$(echo $(( $(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024) / 4 )))
 echo "tmpfs /tmp tmpfs defaults,noatime,nosuid,nodev,mode=1777,size=${tmpfs_size}M 0 0" | sudo tee -a /etc/fstab
 
 # Create /tmp directory if it does not exist

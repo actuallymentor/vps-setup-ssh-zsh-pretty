@@ -13,7 +13,7 @@ else
 	echo "What SSH port do you want to configure? (default 22)"
 	read SSH_PORT
 
-	echo "What username should the non root sudo user have?"
+	echo "What username should the non root sudo user have? (empty for none)"
 	read NONROOT_USERNAME
 
 	echo "What password should this user have?"
@@ -32,7 +32,7 @@ fi
 
 # Set defaults
 AUTO_REBOOT_AT_UPGRADE=${AUTO_REBOOT_AT_UPGRADE:-true}
-NONROOT_USERNAME=${NONROOT_USERNAME:-toor}
+# NONROOT_USERNAME=${NONROOT_USERNAME:-toor}
 NONROOT_SSH=${NONROOT_SSH:-y}
 SSH_PORT=${SSH_PORT:-22}
 FIREWALL=${FIREWALL:-incoming}
@@ -69,18 +69,21 @@ if [ "$SSH_PORT" -lt 1 ] || [ "$SSH_PORT" -gt 65535 ]; then
 fi
 
 if [ ! "$SILENT_INSTALL" ]; then
-	# Check if the nonroot user is alphanumeric
-	if ! [[ "$NONROOT_USERNAME" =~ ^[a-zA-Z0-9]+$ ]]; then
-		echo "NONROOT_USERNAME must be alphanumeric"
-		exit 1
+	# Check if the nonroot user is alphanumeric if it exists
+	if [ "$NONROOT_USERNAME" ]; then
+		if ! [[ "$NONROOT_USERNAME" =~ ^[a-zA-Z0-9]+$ ]]; then
+			echo "NONROOT_USERNAME must be alphanumeric"
+			exit 1
+		fi
 	fi
 
-	# Check if the nonroot password is valid
-	if [ ${#NONROOT_PASSWORD} -lt 8 ]; then
-		echo "NONROOT_PASSWORD must be at least 8 characters"
-		exit 1
+	# Check if the nonroot password is valid if it is set
+	if [ "$NONROOT_PASSWORD" ]; then
+		if [ ${#NONROOT_PASSWORD} -lt 8 ]; then
+			echo "NONROOT_PASSWORD must be at least 8 characters"
+			exit 1
+		fi
 	fi
-fi
 
 # Set noninteractivity if requested
 if [ "$NONINTERACTIVE" == "y" ]; then
@@ -116,8 +119,10 @@ source ./04-swap.sh
 if [ "$SILENT_INSTALL" ]; then
 	echo "Silent install does NOT create nonroot user"
 else
-	## Add a nonroot user
-	source ./05-nonroot-user.sh
+	## Add a nonroot user if username set
+	if [ "$NONROOT_USERNAME" ]; then
+		source ./05-nonroot-user.sh
+	fi
 fi
 
 ## Add basic security measures
