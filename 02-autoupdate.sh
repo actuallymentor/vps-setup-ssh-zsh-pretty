@@ -1,4 +1,9 @@
+
 #!/bin/bash
+set -e
+
+# Set AUTO_REBOOT_AT_UPGRADE default to false
+AUTO_REBOOT_AT_UPGRADE=${AUTO_REBOOT_AT_UPGRADE:-false}
 
 echo "Configuring auto update"
 

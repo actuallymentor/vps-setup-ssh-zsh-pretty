@@ -1,3 +1,4 @@
+set -e
 # Size of physical RAM plus 1
 swaploc=/swapfile
 ramsize=$(echo $((1 + $(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024 * 1024))))

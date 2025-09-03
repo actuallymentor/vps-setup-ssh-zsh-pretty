@@ -1,4 +1,6 @@
+
 #!/bin/bash
+set -e
 # Exit if docker is intalled
 if which docker > /dev/null 2>&1; then
     echo "✅ Docker is already installed"

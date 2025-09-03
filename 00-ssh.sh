@@ -1,4 +1,9 @@
+
 #!/bin/bash
+set -e
+
+# Set default SSH_PORT to 22
+SSH_PORT=${SSH_PORT:-22}
 
 echo "Configuring sshd"
 

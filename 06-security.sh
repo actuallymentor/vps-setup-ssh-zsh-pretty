@@ -1,25 +1,45 @@
+#!/bin/bash 
+set -e
+
 echo "Configuring security measures"
 
+# Firewall default is incoming
+FIREWALL=${FIREWALL:-incoming}
+
+
 #########################
-# Timekeeping
-# https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#ntp-client
+# Timekeeping: Use chrony, migrate from ntp if present
+# https://chrony.tuxfamily.org/
 #########################
 
-# Install ntp and backup original settings
-sudo apt install -y ntp
-sudo cp --archive /etc/ntpsec/ntp.conf /etc/ntpsec/ntp.conf-COPY-$(date +"%Y%m%d%H%M%S")
-# Enable pool and disable server
-sudo sed -i -r -e "s/^((server|pool).*)/# \1         # commented by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")/" /etc/ntpsec/ntp.conf
-echo -e "\npool pool.ntp.org iburst         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/ntpsec/ntp.conf
+# Remove ntp if installed and migrate to chrony
+if dpkg -l | grep -qw ntp; then
+	echo "Migrating from ntp to chrony..."
+	sudo systemctl stop ntp || true
+	sudo apt-get remove --purge -y ntp
+	sudo apt-get autoremove -y
+fi
 
-# Disable built in timekeeping
-# https://www.digitalocean.com/community/tutorials/how-to-set-up-time-synchronization-on-ubuntu-20-04
-sudo timedatectl set-ntp on || echo "Timedatectl disabled"
+# Install chrony
+sudo apt-get update
+sudo apt-get install -y chrony
 
-# Restart and statuses
-sudo service ntp restart
-sudo systemctl status ntp
-sudo ntpq -p
+
+# Backup chrony config (only if it exists)
+if [ -f /etc/chrony/chrony.conf ]; then
+	sudo cp --archive /etc/chrony/chrony.conf /etc/chrony/chrony.conf-COPY-$(date +"%Y%m%d%H%M%S")
+fi
+
+# Ensure pool.ntp.org is present in chrony.conf
+if [ -f /etc/chrony/chrony.conf ] && ! grep -q '^pool pool.ntp.org' /etc/chrony/chrony.conf; then
+	echo -e "\npool pool.ntp.org iburst # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/chrony/chrony.conf
+fi
+
+# Enable and restart chrony
+sudo systemctl enable chrony
+sudo systemctl restart chrony
+sudo systemctl status chrony
+chronyc sources
 
 ###################################
 # Secure /proc process information
@@ -27,8 +47,18 @@ sudo ntpq -p
 ###################################
 
 sudo cp --archive /etc/fstab /etc/fstab-COPY-$(date +"%Y%m%d%H%M%S")
-echo -e "\nproc     /proc     proc     defaults,hidepid=2     0     0         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/fstab
-sudo mount -o remount,hidepid=2 /proc
+# Only add /proc line if not already present with hidepid=2
+if ! grep -E '^proc\s+/proc\s+proc' /etc/fstab | grep -q 'hidepid=2'; then
+	echo -e "\nproc     /proc     proc     defaults,hidepid=2     0     0         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/fstab
+else
+	echo "/proc hidepid=2 already set in /etc/fstab, skipping duplicate."
+fi
+# Remount only if not already set
+if ! mount | grep -E '^proc on /proc ' | grep -q 'hidepid=2'; then
+	sudo mount -o remount,hidepid=2 /proc
+else
+	echo "/proc already mounted with hidepid=2, skipping remount."
+fi
 
 ################################
 # Autoban failed attempts & DDOS

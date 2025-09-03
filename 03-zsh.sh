@@ -1,4 +1,6 @@
+
 #!/bin/bash
+set -e
 
 # Install zsh and highlighting
 sudo apt install zsh -y
