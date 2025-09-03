@@ -5,6 +5,7 @@ echo "Configuring security measures"
 
 # Firewall default is incoming
 FIREWALL=${FIREWALL:-incoming}
+SSH_PORT=${SSH_PORT:-22}
 
 
 #########################
