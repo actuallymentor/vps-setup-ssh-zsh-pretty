@@ -30,11 +30,6 @@ if [ -f /etc/chrony/chrony.conf ]; then
 	sudo cp --archive /etc/chrony/chrony.conf /etc/chrony/chrony.conf-COPY-$(date +"%Y%m%d%H%M%S")
 fi
 
-# Ensure pool.ntp.org is present in chrony.conf
-if [ -f /etc/chrony/chrony.conf ] && ! grep -q '^pool pool.ntp.org' /etc/chrony/chrony.conf; then
-	echo -e "\npool pool.ntp.org iburst # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/chrony/chrony.conf
-fi
-
 # Enable and restart chrony
 sudo systemctl enable chrony
 sudo systemctl restart chrony
