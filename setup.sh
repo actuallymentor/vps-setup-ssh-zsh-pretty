@@ -56,7 +56,8 @@ if [ "$FIREWALL" != "incoming" ] && [ "$FIREWALL" != "bidirectional" ] && [ "$FI
 	exit 1
 fi
 
-# Check if the SSH port is a numberq
+
+# Check if the SSH port is a number
 if ! [[ "$SSH_PORT" =~ ^[0-9]+$ ]]; then
 	echo "SSH_PORT must be a number"
 	exit 1
@@ -67,6 +68,7 @@ if [ "$SSH_PORT" -lt 1 ] || [ "$SSH_PORT" -gt 65535 ]; then
 	echo "SSH_PORT must be between 1 and 65535"
 	exit 1
 fi
+
 
 if [ ! "$SILENT_INSTALL" ]; then
 	# Check if the nonroot user is alphanumeric if it exists
@@ -84,6 +86,8 @@ if [ ! "$SILENT_INSTALL" ]; then
 			exit 1
 		fi
 	fi
+fi
+
 
 # Set noninteractivity if requested
 if [ "$NONINTERACTIVE" == "y" ]; then
