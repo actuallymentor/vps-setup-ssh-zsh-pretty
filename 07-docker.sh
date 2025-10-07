@@ -35,14 +35,17 @@ sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin d
 if [ -z "$USER" ]; then
     USER=$(whoami)
 fi
-sudo groupadd docker &> /dev/null
+echo -e "\nAdding user $USER to docker group\n"
+sudo groupadd docker &> /dev/null || true
 sudo usermod -aG docker $USER
 
 # Add the nonroot user to docker group if NONROOT_USERNAME is set
 if [ -n "$NONROOT_USERNAME" ]; then
+    echo -e "\nAdding nonroot user $NONROOT_USERNAME to docker group\n"
     sudo usermod -aG docker $NONROOT_USERNAME
 fi
 
+# Switch to docker group to verify installation
 newgrp docker << EOF
     echo -e "\nStarting docker daemon\n"
     sudo service docker start
