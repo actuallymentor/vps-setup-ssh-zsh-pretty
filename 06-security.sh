@@ -34,8 +34,7 @@ fi
 # Enable and restart chrony
 sudo systemctl enable chrony
 sudo systemctl restart chrony
-sudo systemctl status chrony
-chronyc sources
+echo "Timekeeping configured with chrony"
 
 ###################################
 # Secure /proc process information
