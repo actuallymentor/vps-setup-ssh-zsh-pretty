@@ -94,6 +94,11 @@ if [ "$NONINTERACTIVE" == "y" ]; then
 	export DEBIAN_FRONTEND=noninteractive
 fi
 
+# If SILENT_INSTALL, set firewall to n
+if [ "$SILENT_INSTALL" ]; then
+	FIREWALL="n"
+fi
+
 # Exit if error
 set -e
 
