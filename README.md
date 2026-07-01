@@ -24,6 +24,7 @@ bash setup.sh true
 1. This script targets Ubuntu 26.04 LTS.
 1. This will disable password-based authentication on your system, make sure you have an ssh key installed or you will not be able to SSH into your server **at all**.
 	- An implicit assumption is that you run this script from a user that logs in via an ssh key.
+	- When using a custom SSH port, verify the listener with `ss -tlnp | grep sshd` before closing your current session.
 1. Automatic reboot after unattended upgrades defaults to `true`.
 1. Swap setup intentionally disables existing swap and leaves the machine with only `/swapfile` configured by this script.
 1. Docker is installed from Docker's Ubuntu apt repository for the detected Ubuntu codename.

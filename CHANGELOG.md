@@ -13,3 +13,4 @@
 
 - document Ubuntu 26.04 target and intentional defaults (pending)
 - note Docker-published ports bypass UFW by default (pending)
+- add custom SSH port verification guidance (pending)
