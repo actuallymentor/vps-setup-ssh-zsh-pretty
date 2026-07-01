@@ -68,7 +68,7 @@ sudo install -m 644 "$tmp_fstab" /etc/fstab
 rm -f "$tmp_fstab"
 
 # Remount unless the live mount already has the managed hidepid settings.
-if ! mount | grep -E '^proc on /proc ' | grep -q 'hidepid=2' || ! mount | grep -E '^proc on /proc ' | grep -q "gid=$proc_gid"; then
+if ! mount | grep -E '^proc on /proc ' | grep -Eq 'hidepid=(2|invisible)' || ! mount | grep -E '^proc on /proc ' | grep -q "gid=$proc_gid"; then
 	sudo mount -o "remount,hidepid=2,gid=$proc_gid" /proc
 else
 	echo "/proc already mounted with hidepid=2,gid=$proc_gid, skipping remount."

@@ -7,6 +7,7 @@
 - harden Ubuntu 26.04 setup safety and idempotency (pending)
 - update Docker, SSH, fail2ban, swap, and apt flows (pending)
 - handle socket-activated SSH when changing ports (pending)
+- reload active SSH daemons after socket updates (pending)
 
 ### Changed
 

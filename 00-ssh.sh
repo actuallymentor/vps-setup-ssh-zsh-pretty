@@ -26,6 +26,10 @@ reloadSSH() {
 		sudo systemctl daemon-reload
 		sudo systemctl enable ssh.socket
 		sudo systemctl restart ssh.socket
+
+		# If ssh.service is already active, reload it so config changes such as
+		# DenyUsers and stale listeners are not left to the next connection.
+		sudo systemctl reload ssh.service 2>/dev/null || true
 	else
 		sudo systemctl reload ssh.service || sudo systemctl restart ssh.service
 	fi

@@ -27,6 +27,7 @@ reload_ssh_access() {
 	if sudo systemctl is-enabled --quiet ssh.socket 2>/dev/null || sudo systemctl is-active --quiet ssh.socket 2>/dev/null; then
 		sudo systemctl daemon-reload
 		sudo systemctl restart ssh.socket
+		sudo systemctl reload ssh.service 2>/dev/null || true
 	else
 		sudo systemctl reload ssh.service || sudo systemctl restart ssh.service
 	fi
