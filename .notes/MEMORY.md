@@ -5,3 +5,4 @@ Load this file at the start of every run. It indexes persistent notes and when t
 | File path | Relevance |
 | --- | --- |
 | `./.notes/MEMORY.md` | The index of the memory system; load at the start of every run. |
+| `./.notes/GOTCHAS.md` | Project-specific behavioral constraints and footguns; load before changing setup scripts. |

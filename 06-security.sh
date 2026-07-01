@@ -1,5 +1,5 @@
-#!/bin/bash 
-set -e
+#!/bin/bash
+set -euo pipefail
 
 echo "Configuring security measures"
 
@@ -7,6 +7,13 @@ echo "Configuring security measures"
 FIREWALL=${FIREWALL:-incoming}
 SSH_PORT=${SSH_PORT:-22}
 
+apt_get() {
+	if [ "${NONINTERACTIVE:-y}" = "y" ]; then
+		sudo env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=600 "$@"
+	else
+		sudo apt-get -o DPkg::Lock::Timeout=600 "$@"
+	fi
+}
 
 #########################
 # Timekeeping: Use chrony, migrate from ntp if present
@@ -14,21 +21,20 @@ SSH_PORT=${SSH_PORT:-22}
 #########################
 
 # Remove ntp if installed and migrate to chrony
-if dpkg -l | grep -qw ntp; then
+if dpkg-query -W -f='${db:Status-Abbrev}' ntp 2>/dev/null | grep -q '^ii'; then
 	echo "Migrating from ntp to chrony..."
 	sudo systemctl stop ntp || true
-	sudo apt-get remove --purge -y ntp
-	sudo apt-get autoremove -y
+	apt_get remove --purge -y ntp
+	apt_get autoremove -y
 fi
 
 # Install chrony
-sudo apt-get update
-sudo apt-get install -y chrony
-
+apt_get update
+apt_get install -y chrony
 
 # Backup chrony config (only if it exists)
 if [ -f /etc/chrony/chrony.conf ]; then
-	sudo cp --archive /etc/chrony/chrony.conf /etc/chrony/chrony.conf-COPY-$(date +"%Y%m%d%H%M%S")
+	sudo cp --archive /etc/chrony/chrony.conf "/etc/chrony/chrony.conf-COPY-$(date +"%Y%m%d%H%M%S")"
 fi
 
 # Enable and restart chrony
@@ -41,13 +47,19 @@ echo "Timekeeping configured with chrony"
 # https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#securing-proc
 ###################################
 
-sudo cp --archive /etc/fstab /etc/fstab-COPY-$(date +"%Y%m%d%H%M%S")
-# Only add /proc line if not already present with hidepid=2
-if ! grep -E '^proc\s+/proc\s+proc' /etc/fstab | grep -q 'hidepid=2'; then
-	echo -e "\nproc     /proc     proc     defaults,hidepid=2     0     0         # added by $(whoami) on $(date +"%Y-%m-%d @ %H:%M:%S")" | sudo tee -a /etc/fstab
-else
-	echo "/proc hidepid=2 already set in /etc/fstab, skipping duplicate."
-fi
+sudo cp --archive /etc/fstab "/etc/fstab-COPY-$(date +"%Y%m%d%H%M%S")"
+
+tmp_fstab=$(mktemp)
+awk '
+	$0 ~ /^[[:space:]]*#/ { print; next }
+	NF == 0 { print; next }
+	$1 == "proc" && $2 == "/proc" && $3 == "proc" { next }
+	{ print }
+' /etc/fstab >"$tmp_fstab"
+echo "proc /proc proc defaults,hidepid=2 0 0 # vps-setup-managed proc" >>"$tmp_fstab"
+sudo install -m 644 "$tmp_fstab" /etc/fstab
+rm -f "$tmp_fstab"
+
 # Remount only if not already set
 if ! mount | grep -E '^proc on /proc ' | grep -q 'hidepid=2'; then
 	sudo mount -o remount,hidepid=2 /proc
@@ -59,24 +71,14 @@ fi
 # Autoban failed attempts & DDOS
 # https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#application-intrusion-detection-and-prevention-with-fail2ban
 ################################
-sudo apt install -y fail2ban
-echo -e "
-[sshd]
-enabled = true
-banaction = ufw
-port = $SSH_PORT
-filter = sshd
-logpath = %(sshd_log)s
-maxretry = 5
-" | sudo tee /etc/fail2ban/jail.d/ssh.conf
+apt_get install -y fail2ban
 
 #########################
 # Firewall
 # https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#firewall-with-ufw-uncomplicated-firewall
 #########################
 if [ "$FIREWALL" != "n" ]; then
-	
-	sudo apt install -y ufw
+	apt_get install -y ufw
 
 	# If the firewall is set to buy directional block outgoing and incoming
 	if [ "$FIREWALL" = "bidirectional" ]; then
@@ -93,15 +95,18 @@ if [ "$FIREWALL" != "n" ]; then
 	# If the firewall is set to incoming, block incoming only
 	if [ "$FIREWALL" = "incoming" ]; then
 		# Disallow by default
+		echo "Setting UFW to deny incoming connections by default"
 		sudo ufw default deny incoming comment 'deny all incoming traffic'
 	fi
 
 	# This is default behaviour, adding for verbosity
 	if [ "$SSH_PORT" != "22" ]; then
+		echo "Denying default SSH port 22/tcp"
 		sudo ufw deny 22/tcp comment 'Deny default SSH port'
 	fi
 
 	# Allow ssh access
+	echo "Allowing SSH on port $SSH_PORT/tcp"
 	sudo ufw allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
 	
 
@@ -109,11 +114,28 @@ if [ "$FIREWALL" != "n" ]; then
 	sudo ufw status numbered
 	echo -e "\nUFW will now enable, your current tunnel will break because your SSH port is now $SSH_PORT"
 	echo -e "You can log back in using the -p $SSH_PORT flag in your command"
-	echo -e "Press any key to continue"
-	read
+	if [ "${NONINTERACTIVE:-y}" != "y" ]; then
+		read -r -n 1 -p "Press any key to continue" _
+		echo
+	fi
 
 	sudo ufw --force enable
 
 fi
+
+{
+	echo "[sshd]"
+	echo "enabled = true"
+	if [ "$FIREWALL" != "n" ]; then
+		echo "banaction = ufw"
+	fi
+	echo "port = $SSH_PORT"
+	echo "filter = sshd"
+	echo "logpath = %(sshd_log)s"
+	echo "maxretry = 5"
+} | sudo tee /etc/fail2ban/jail.d/ssh.conf >/dev/null
+
+sudo systemctl enable fail2ban.service
+sudo systemctl restart fail2ban.service
 
 echo "Security config complete"

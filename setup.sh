@@ -1,6 +1,26 @@
 #!/bin/bash
+set -euo pipefail
 
-SILENT_INSTALL=$1
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SILENT_INSTALL=${1:-}
+
+AUTO_REBOOT_AT_UPGRADE=${AUTO_REBOOT_AT_UPGRADE:-}
+SSH_PORT=${SSH_PORT:-}
+NONROOT_USERNAME=${NONROOT_USERNAME:-}
+NONROOT_PASSWORD=${NONROOT_PASSWORD:-}
+NONROOT_SSH=${NONROOT_SSH:-}
+FIREWALL=${FIREWALL:-}
+NONINTERACTIVE=${NONINTERACTIVE:-}
+SUDO_PID=""
+
+cleanup() {
+	if [ -n "$SUDO_PID" ] && kill -0 "$SUDO_PID" 2>/dev/null; then
+		kill "$SUDO_PID"
+		wait "$SUDO_PID" 2>/dev/null || true
+	fi
+}
+
+trap cleanup EXIT
 
 # Check if a silent install was requested
 if [ "$SILENT_INSTALL" ]; then
@@ -8,31 +28,33 @@ if [ "$SILENT_INSTALL" ]; then
 else
 	# Settings
 	echo "Do you want to automatically reboot after an auto-upgrade? [true/false] (default true)"
-	read AUTO_REBOOT_AT_UPGRADE
+	read -r AUTO_REBOOT_AT_UPGRADE
 
 	echo "What SSH port do you want to configure? (default 22)"
-	read SSH_PORT
+	read -r SSH_PORT
 
 	echo "What username should the non root sudo user have? (empty for none)"
-	read NONROOT_USERNAME
+	read -r NONROOT_USERNAME
 
-	echo "What password should this user have?"
-	read -s NONROOT_PASSWORD
+	if [ "$NONROOT_USERNAME" ]; then
+		echo "What password should this user have?"
+		read -rs NONROOT_PASSWORD
+		echo
 
-	echo "Should the nonroot user be able to SSH into the machine? [y/n] (default y)"
-	read NONROOT_SSH
+		echo "Should the nonroot user be able to SSH into the machine? [y/n] (default y)"
+		read -r NONROOT_SSH
+	fi
 
 	echo "Should I set up a firewall? [incoming/bidirectional/n] (default incoming)"
-	read FIREWALL
+	read -r FIREWALL
 
 	echo "Should I install things noninteractively? [y/n] (default y)"
-	read NONINTERACTIVE
+	read -r NONINTERACTIVE
 
 fi
 
 # Set defaults
 AUTO_REBOOT_AT_UPGRADE=${AUTO_REBOOT_AT_UPGRADE:-true}
-# NONROOT_USERNAME=${NONROOT_USERNAME:-toor}
 NONROOT_SSH=${NONROOT_SSH:-y}
 SSH_PORT=${SSH_PORT:-22}
 FIREWALL=${FIREWALL:-incoming}
@@ -56,6 +78,10 @@ if [ "$FIREWALL" != "incoming" ] && [ "$FIREWALL" != "bidirectional" ] && [ "$FI
 	exit 1
 fi
 
+if [ "$NONINTERACTIVE" != "y" ] && [ "$NONINTERACTIVE" != "n" ]; then
+	echo "NONINTERACTIVE must be y or n"
+	exit 1
+fi
 
 # Check if the SSH port is a number
 if ! [[ "$SSH_PORT" =~ ^[0-9]+$ ]]; then
@@ -73,14 +99,12 @@ fi
 if [ ! "$SILENT_INSTALL" ]; then
 	# Check if the nonroot user is alphanumeric if it exists
 	if [ "$NONROOT_USERNAME" ]; then
-		if ! [[ "$NONROOT_USERNAME" =~ ^[a-zA-Z0-9]+$ ]]; then
-			echo "NONROOT_USERNAME must be alphanumeric"
+		if ! [[ "$NONROOT_USERNAME" =~ ^[a-z_][a-z0-9_-]*\$?$ ]]; then
+			echo "NONROOT_USERNAME must be a valid Ubuntu username"
 			exit 1
 		fi
-	fi
 
-	# Check if the nonroot password is valid if it is set
-	if [ "$NONROOT_PASSWORD" ]; then
+		# Check if the nonroot password is valid if it is set
 		if [ ${#NONROOT_PASSWORD} -lt 8 ]; then
 			echo "NONROOT_PASSWORD must be at least 8 characters"
 			exit 1
@@ -96,49 +120,47 @@ fi
 
 # If SILENT_INSTALL, set firewall to n
 if [ "$SILENT_INSTALL" ]; then
+	echo "Silent install does NOT configure firewall"
 	FIREWALL="n"
 fi
 
-# Exit if error
-set -e
-
 # Fix common networking error
-echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
+server_hostname="$(hostname)"
+if ! grep -Fq "127.0.0.1 $server_hostname" /etc/hosts; then
+	echo "127.0.0.1 $server_hostname" | sudo tee -a /etc/hosts >/dev/null
+fi
 
 # Activate sudo
 sudo -v
-(while true; do sudo -v; sleep 30; done) &
+(while true; do sudo -n true; sleep 30; done) &
 SUDO_PID=$!
 
 ## SSH key
-source ./00-ssh.sh
+source "$SCRIPT_DIR/00-ssh.sh"
 
 ## Upgrade full system
-source ./01-upgrade.sh
+source "$SCRIPT_DIR/01-upgrade.sh"
 
 ## Enable autoupdates with purging
-source ./02-autoupdate.sh
+source "$SCRIPT_DIR/02-autoupdate.sh"
 
 ## Install and configure ZSH
-source ./03-zsh.sh
+source "$SCRIPT_DIR/03-zsh.sh"
 
 ## Add swap space (1 + size of ram)
-source ./04-swap.sh
+source "$SCRIPT_DIR/04-swap.sh"
 
 if [ "$SILENT_INSTALL" ]; then
 	echo "Silent install does NOT create nonroot user"
 else
 	## Add a nonroot user if username set
 	if [ "$NONROOT_USERNAME" ]; then
-		source ./05-nonroot-user.sh
+		source "$SCRIPT_DIR/05-nonroot-user.sh"
 	fi
 fi
 
 ## Add basic security measures
-source ./06-security.sh
+source "$SCRIPT_DIR/06-security.sh"
 
 ## Install docker
-source ./07-docker.sh
-
-## Kill the sudo loop
-kill $SUDO_PID
+source "$SCRIPT_DIR/07-docker.sh"
