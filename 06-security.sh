@@ -6,6 +6,7 @@ echo "Configuring security measures"
 # Firewall default is incoming
 FIREWALL=${FIREWALL:-incoming}
 SSH_PORT=${SSH_PORT:-22}
+PROC_HIDE_GROUP=${PROC_HIDE_GROUP:-sudo}
 
 apt_get() {
 	if [ "${NONINTERACTIVE:-y}" = "y" ]; then
@@ -49,6 +50,12 @@ echo "Timekeeping configured with chrony"
 
 sudo cp --archive /etc/fstab "/etc/fstab-COPY-$(date +"%Y%m%d%H%M%S")"
 
+proc_gid=$(getent group "$PROC_HIDE_GROUP" | cut -d: -f3 || true)
+if [ -z "$proc_gid" ]; then
+	echo "Could not find $PROC_HIDE_GROUP group for /proc hidepid whitelist"
+	exit 1
+fi
+
 tmp_fstab=$(mktemp)
 awk '
 	$0 ~ /^[[:space:]]*#/ { print; next }
@@ -56,15 +63,15 @@ awk '
 	$1 == "proc" && $2 == "/proc" && $3 == "proc" { next }
 	{ print }
 ' /etc/fstab >"$tmp_fstab"
-echo "proc /proc proc defaults,hidepid=2 0 0 # vps-setup-managed proc" >>"$tmp_fstab"
+echo "proc /proc proc defaults,hidepid=2,gid=$proc_gid 0 0 # vps-setup-managed proc" >>"$tmp_fstab"
 sudo install -m 644 "$tmp_fstab" /etc/fstab
 rm -f "$tmp_fstab"
 
-# Remount only if not already set
-if ! mount | grep -E '^proc on /proc ' | grep -q 'hidepid=2'; then
-	sudo mount -o remount,hidepid=2 /proc
+# Remount unless the live mount already has the managed hidepid settings.
+if ! mount | grep -E '^proc on /proc ' | grep -q 'hidepid=2' || ! mount | grep -E '^proc on /proc ' | grep -q "gid=$proc_gid"; then
+	sudo mount -o "remount,hidepid=2,gid=$proc_gid" /proc
 else
-	echo "/proc already mounted with hidepid=2, skipping remount."
+	echo "/proc already mounted with hidepid=2,gid=$proc_gid, skipping remount."
 fi
 
 ################################
@@ -129,9 +136,9 @@ fi
 	if [ "$FIREWALL" != "n" ]; then
 		echo "banaction = ufw"
 	fi
+	echo "backend = systemd"
 	echo "port = $SSH_PORT"
 	echo "filter = sshd"
-	echo "logpath = %(sshd_log)s"
 	echo "maxretry = 5"
 } | sudo tee /etc/fail2ban/jail.d/ssh.conf >/dev/null
 

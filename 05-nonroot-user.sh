@@ -20,6 +20,18 @@ if ! declare -F installOhMyZSH >/dev/null; then
 	exit 1
 fi
 
+reload_ssh_access() {
+	sudo install -d -m 755 /run/sshd
+	sudo sshd -t
+
+	if sudo systemctl is-enabled --quiet ssh.socket 2>/dev/null || sudo systemctl is-active --quiet ssh.socket 2>/dev/null; then
+		sudo systemctl daemon-reload
+		sudo systemctl restart ssh.socket
+	else
+		sudo systemctl reload ssh.service || sudo systemctl restart ssh.service
+	fi
+}
+
 # Check if $NONROOT_USERNAME user already exists
 if id "$NONROOT_USERNAME" &>/dev/null; then
 	echo "User $NONROOT_USERNAME already exists, skipping"
@@ -46,18 +58,14 @@ sudo chown -R "$NONROOT_USERNAME:$NONROOT_USERNAME" "$userhome"
 
 # Deny user SSH access
 if [ "$NONROOT_SSH" = "n" ]; then
-	sudo install -d -m 755 /run/sshd
 	echo "DenyUsers $NONROOT_USERNAME" | sudo tee /etc/ssh/sshd_config.d/15-vps-setup-deny-users.conf >/dev/null
-	sudo sshd -t
-	sudo systemctl reload ssh.service || sudo systemctl restart ssh.service
+	reload_ssh_access
 else
 	# add the ssh key to this user as well
 	sudo rm -f /etc/ssh/sshd_config.d/15-vps-setup-deny-users.conf
 	sudo install -d -m 700 -o "$NONROOT_USERNAME" -g "$NONROOT_USERNAME" "$userhome/.ssh"
 	sudo install -m 600 -o "$NONROOT_USERNAME" -g "$NONROOT_USERNAME" "$HOME/.ssh/authorized_keys" "$userhome/.ssh/authorized_keys"
-	sudo install -d -m 755 /run/sshd
-	sudo sshd -t
-	sudo systemctl reload ssh.service || sudo systemctl restart ssh.service
+	reload_ssh_access
 fi
 
 echo "Nonroot user created"

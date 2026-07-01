@@ -27,3 +27,4 @@ bash setup.sh true
 1. Automatic reboot after unattended upgrades defaults to `true`.
 1. Swap setup intentionally disables existing swap and leaves the machine with only `/swapfile` configured by this script.
 1. Docker is installed from Docker's Ubuntu apt repository for the detected Ubuntu codename.
+1. Docker-published ports are not automatically protected by UFW; bind containers deliberately or add Docker firewall rules before exposing services.
