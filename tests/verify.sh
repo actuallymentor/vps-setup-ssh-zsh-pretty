@@ -46,7 +46,7 @@ check 'automatic upgrades' grep -q 'APT::Periodic::Unattended-Upgrade "1";' <<<"
 check 'automatic reboot setting' grep -q "Unattended-Upgrade::Automatic-Reboot \"$AUTO_REBOOT_AT_UPGRADE\";" <<<"$apt_config"
 check 'automatic upgrade timer' systemctl is-enabled --quiet apt-daily-upgrade.timer
 # shellcheck disable=SC2016 # Expanded by the child zsh.
-check 'zsh startup' zsh -ic '[[ -n "$ZSH" && "$ZSH_THEME" == agnoster-newline ]]'
+check 'zsh startup' env DISABLE_AUTO_UPDATE=true zsh -ic '[[ -n "$ZSH" && "$ZSH_THEME" == agnoster-newline ]]'
 check 'Mosh server' mosh-server --version
 
 if [ "$FIREWALL" != n ]; then

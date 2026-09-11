@@ -22,6 +22,7 @@ fi
 
 # Access changes do not alter listening sockets.
 reload_ssh_access() {
+	sudo install -d -m 755 /run/sshd
 	sudo /usr/sbin/sshd -t
 	sudo systemctl reload ssh.service || sudo systemctl restart ssh.service
 }

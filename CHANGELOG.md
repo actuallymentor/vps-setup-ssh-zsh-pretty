@@ -4,21 +4,23 @@
 
 ### Added
 
-- install Mosh and configure UDP 60000–61000 firewall access
-- add full `--noninteractive` mode with environment settings
-- add preflight regression tests and live VPS verification
+- add Mosh with UDP 60000–61000 firewall access (80b04c7)
+- add full `--noninteractive` mode with environment settings (80b04c7)
+- add preflight regression tests and live VPS verification (80b04c7)
 
 ### Fixed
 
-- open changed SSH ports before replacing listeners
-- restart SSH to discard stale sockets in either activation mode
-- remove conflicting port-22 rules and restore outgoing firewall policy
-- allow NTS key exchange through bidirectional firewalls
-- preserve existing user keys and independent SSH restrictions
-- handle dpkg conffile prompts during unattended installation
-- reject invalid ports, invalid keys, and unsafe nonroot account selections
-- stop on swapoff failure and refresh generated mount units
-- install and verify Docker Engine/plugins despite an existing CLI
+- support empty UFW rulesets and reject reserved nonroot accounts (pending)
+
+- open changed SSH ports before replacing listeners (80b04c7)
+- restart SSH to discard inherited listeners (80b04c7)
+- fix SSH firewall transitions and outgoing policy (80b04c7)
+- allow NTS key exchange through bidirectional firewalls (80b04c7)
+- preserve existing user keys and independent SSH restrictions (80b04c7)
+- handle dpkg conffile prompts during unattended installation (80b04c7)
+- reject invalid keys/ports and unsafe nonroot accounts (80b04c7)
+- stop on swapoff failure and refresh generated mount units (80b04c7)
+- install/verify Docker Engine and plugins despite an existing CLI (80b04c7)
 
 - harden Ubuntu 26.04 setup safety and idempotency (pending)
 - update Docker, SSH, fail2ban, swap, and apt flows (pending)
@@ -27,7 +29,7 @@
 
 ### Changed
 
-- support Ubuntu 24.04 and 26.04 LTS
+- support Ubuntu 24.04 and 26.04 LTS (80b04c7)
 
 - document Ubuntu 26.04 target and intentional defaults (pending)
 - note Docker-published ports bypass UFW by default (pending)

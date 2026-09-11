@@ -30,7 +30,7 @@ SSH_PORT=2222 FIREWALL=bidirectional bash setup.sh --noninteractive </dev/null
 | `SSH_PORT` | `22` | `1`–`65535` |
 | `FIREWALL` | `incoming` | `incoming`, `bidirectional`, `n` (leave policy alone) |
 | `AUTO_REBOOT_AT_UPGRADE` | `true` | `true`, `false` |
-| `NONROOT_USERNAME` | empty | Optional sudo user; cannot be root/current/system account |
+| `NONROOT_USERNAME` | empty | Optional sudo user; lowercase initial letter, UID 1000–60000; not current login |
 | `NONROOT_PASSWORD` | empty | Required for a new user; at least 8 characters |
 | `NONROOT_SSH` | `y` | `y`, `n` |
 | `NONINTERACTIVE` | `y` | `y`, `n`; controls package/configuration prompts |
@@ -60,10 +60,10 @@ firewall. Silent mode and `FIREWALL=n` leave Mosh firewall rules to you.
 make test  # Local syntax, ShellCheck, and preflight regression checks
 
 # On the configured VPS, as root; match the settings used for installation:
-SSH_PORT=2222 FIREWALL=bidirectional NONROOT_USERNAME=admin make verify
+SSH_PORT=2222 FIREWALL=bidirectional NONROOT_USERNAME=admin bash tests/verify.sh
 ```
 
-`make verify` checks services, effective SSH settings, firewall rules, mounts,
+`tests/verify.sh` checks services, effective SSH settings, firewall rules, mounts,
 automatic updates, Zsh, Mosh, and a real Docker container. Also test a fresh
 SSH login, sudo, and a Mosh session from another host. See [AUDIT.md](AUDIT.md)
 for the compatibility test matrix and limits.

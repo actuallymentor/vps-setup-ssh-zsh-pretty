@@ -112,12 +112,12 @@ if [ "$FIREWALL" != "n" ]; then
 	if [ "$SSH_PORT" != "22" ]; then
 		echo "Denying default SSH port 22/tcp"
 		sudo ufw --force delete allow 22/tcp
-		sudo ufw insert 1 deny 22/tcp comment 'Deny default SSH port'
+		sudo ufw prepend deny 22/tcp comment 'Deny default SSH port'
 	fi
 
 	# Allow ssh access
 	echo "Allowing SSH on port $SSH_PORT/tcp"
-	sudo ufw insert 1 allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
+	sudo ufw prepend allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
 	sudo ufw allow 60000:61000/udp comment 'Allow Mosh'
 
 	# Enable and log

@@ -132,13 +132,15 @@ if [ "$SILENT_INSTALL" ]; then
 fi
 
 if [ "$NONROOT_USERNAME" ]; then
-	if ! [[ "$NONROOT_USERNAME" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
+	if ! [[ "$NONROOT_USERNAME" =~ ^[a-z][a-z0-9_-]{0,31}$ ]]; then
 		echo "NONROOT_USERNAME must be a valid Ubuntu username (up to 32 characters)"
 		exit 1
 	fi
 
+	# Ubuntu regular accounts use UIDs 1000–60000; exclude nobody as well.
+	nonroot_uid=$(id -u "$NONROOT_USERNAME" 2>/dev/null || true)
 	if [ "$NONROOT_USERNAME" = "$(id -un)" ] || [ "$NONROOT_USERNAME" = "${SUDO_USER:-root}" ] ||
-		{ id "$NONROOT_USERNAME" &>/dev/null && [ "$(id -u "$NONROOT_USERNAME")" -lt 1000 ]; }; then
+		{ [ -n "$nonroot_uid" ] && ((nonroot_uid < 1000 || nonroot_uid > 60000)); }; then
 		echo "Choose a nonroot user other than the current login or a system account"
 		exit 1
 	fi

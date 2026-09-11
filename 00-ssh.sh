@@ -46,9 +46,9 @@ if command -v ufw >/dev/null && sudo ufw status | grep -q '^Status: active'; the
 		previous_ssh_port=$(sudo awk '$1 == "Port" { print $2; exit }' "$SSH_CONFIG")
 	fi
 
-	# UFW treats an opposite-action rule as an existing match for insert.
+	# UFW treats an opposite-action rule as an existing match for prepend.
 	sudo ufw --force delete deny "$SSH_PORT/tcp"
-	sudo ufw insert 1 allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
+	sudo ufw prepend allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
 fi
 
 # SSH Setup
