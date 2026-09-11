@@ -8,13 +8,8 @@ FIREWALL=${FIREWALL:-incoming}
 SSH_PORT=${SSH_PORT:-22}
 PROC_HIDE_GROUP=${PROC_HIDE_GROUP:-sudo}
 
-apt_get() {
-	if [ "${NONINTERACTIVE:-y}" = "y" ]; then
-		sudo env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=600 "$@"
-	else
-		sudo apt-get -o DPkg::Lock::Timeout=600 "$@"
-	fi
-}
+# shellcheck source=common.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 #########################
 # Timekeeping: Use chrony, migrate from ntp if present
@@ -66,6 +61,7 @@ awk '
 echo "proc /proc proc defaults,hidepid=2,gid=$proc_gid 0 0 # vps-setup-managed proc" >>"$tmp_fstab"
 sudo install -m 644 "$tmp_fstab" /etc/fstab
 rm -f "$tmp_fstab"
+sudo systemctl daemon-reload
 
 # Remount unless the live mount already has the managed hidepid settings.
 if ! mount | grep -E '^proc on /proc ' | grep -Eq 'hidepid=(2|invisible)' || ! mount | grep -E '^proc on /proc ' | grep -q "gid=$proc_gid"; then
@@ -78,7 +74,7 @@ fi
 # Autoban failed attempts & DDOS
 # https://github.com/imthenachoman/How-To-Secure-A-Linux-Server#application-intrusion-detection-and-prevention-with-fail2ban
 ################################
-apt_get install -y fail2ban
+apt_get install -y fail2ban mosh
 
 #########################
 # Firewall
@@ -87,16 +83,19 @@ apt_get install -y fail2ban
 if [ "$FIREWALL" != "n" ]; then
 	apt_get install -y ufw
 
-	# If the firewall is set to buy directional block outgoing and incoming
+	# Bidirectional mode allows only the outbound services used by this suite.
 	if [ "$FIREWALL" = "bidirectional" ]; then
 		# Disallow by default
 		sudo ufw default deny outgoing comment 'deny all outgoing traffic'
-		sudo ufw default deny incoming comment 'deny all incoming traffic' 
+		sudo ufw default deny incoming comment 'deny all incoming traffic'
 		# Allow specific things
 		sudo ufw allow out 53 comment 'allow DNS calls out'
-		sudo ufw allow out 123 comment 'allow NTP out' # For timekeeping, see below
-		sudo ufw allow out http comment 'allow HTTP traffic out' # apt is likely to use these
+		sudo ufw allow out 123/udp comment 'allow NTP out'
+		sudo ufw allow out 4460/tcp comment 'allow NTS key exchange out'
+		sudo ufw allow out http comment 'allow HTTP traffic out'   # apt is likely to use these
 		sudo ufw allow out https comment 'allow HTTPS traffic out' # apt is likely to use these
+		# Mosh can resume after conntrack expires or the client changes networks.
+		sudo ufw allow out proto udp from any port 60000:61000 to any comment 'Allow Mosh replies'
 	fi
 
 	# If the firewall is set to incoming, block incoming only
@@ -104,22 +103,26 @@ if [ "$FIREWALL" != "n" ]; then
 		# Disallow by default
 		echo "Setting UFW to deny incoming connections by default"
 		sudo ufw default deny incoming comment 'deny all incoming traffic'
+		sudo ufw default allow outgoing comment 'allow all outgoing traffic'
 	fi
 
-	# This is default behaviour, adding for verbosity
+	# Remove the old suite rule before allowing port 22 again.
+	sudo ufw --force delete deny 22/tcp
+
 	if [ "$SSH_PORT" != "22" ]; then
 		echo "Denying default SSH port 22/tcp"
-		sudo ufw deny 22/tcp comment 'Deny default SSH port'
+		sudo ufw --force delete allow 22/tcp
+		sudo ufw insert 1 deny 22/tcp comment 'Deny default SSH port'
 	fi
 
 	# Allow ssh access
 	echo "Allowing SSH on port $SSH_PORT/tcp"
-	sudo ufw allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
-	
+	sudo ufw insert 1 allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
+	sudo ufw allow 60000:61000/udp comment 'Allow Mosh'
 
 	# Enable and log
 	sudo ufw status numbered
-	echo -e "\nUFW will now enable, your current tunnel will break because your SSH port is now $SSH_PORT"
+	echo -e "\nUFW will now enable. SSH uses TCP $SSH_PORT; Mosh uses UDP 60000:61000."
 	echo -e "You can log back in using the -p $SSH_PORT flag in your command"
 	if [ "${NONINTERACTIVE:-y}" != "y" ]; then
 		read -r -n 1 -p "Press any key to continue" _

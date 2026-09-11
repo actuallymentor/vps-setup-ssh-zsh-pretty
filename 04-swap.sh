@@ -33,7 +33,7 @@ ramsize=$((1 + $(getconf _PHYS_PAGES) * $(getconf PAGE_SIZE) / (1024 * 1024 * 10
 unit=G
 
 # Disable swap in case it is in use
-sudo swapoff -a || true
+sudo swapoff -a
 
 # Allocate swap space
 sudo rm -f "$swaploc"
@@ -66,5 +66,7 @@ rewrite_fstab
 # Create /tmp directory if it does not exist
 sudo mkdir -p /tmp
 
-# Mount all
+# Reload generated mount units after editing fstab.
+sudo systemctl daemon-reload
 sudo mount -a
+sudo mount -o remount /tmp

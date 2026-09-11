@@ -6,13 +6,8 @@ AUTO_REBOOT_AT_UPGRADE=${AUTO_REBOOT_AT_UPGRADE:-true}
 
 echo "Configuring auto update"
 
-apt_get() {
-	if [ "${NONINTERACTIVE:-y}" = "y" ]; then
-		sudo env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=600 "$@"
-	else
-		sudo apt-get -o DPkg::Lock::Timeout=600 "$@"
-	fi
-}
+# shellcheck source=common.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 # Automatic updates
 apt_get install -y unattended-upgrades update-notifier-common

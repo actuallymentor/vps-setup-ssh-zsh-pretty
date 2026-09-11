@@ -1,13 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-apt_get() {
-	if [ "${NONINTERACTIVE:-y}" = "y" ]; then
-		sudo env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=600 "$@"
-	else
-		sudo apt-get -o DPkg::Lock::Timeout=600 "$@"
-	fi
-}
+# shellcheck source=common.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 configure_docker_access() {
 	local current_user
@@ -22,21 +17,6 @@ configure_docker_access() {
 		sudo usermod -aG docker "$NONROOT_USERNAME"
 	fi
 }
-
-# Exit if docker is installed
-if command -v docker >/dev/null 2>&1; then
-	echo "Docker is already installed"
-	docker --version
-	echo "If you suspect that docker is not installed correctly, you can run the following command to uninstall it:"
-	echo -e "apt-get purge -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin\n"
-	configure_docker_access
-
-	if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
-		return 0
-	fi
-
-	exit 0
-fi
 
 # As per https://docs.docker.com/engine/install/ubuntu/#set-up-the-repository
 
@@ -62,9 +42,15 @@ fi
 DOCKER_ARCH="$(dpkg --print-architecture)"
 
 # Remove conflicting distro packages before installing Docker CE.
-for package in docker.io docker-compose docker-compose-v2 docker-doc podman-docker; do
-	apt_get remove -y "$package" || true
+conflicts=()
+for package in docker.io docker-compose docker-compose-v2 docker-doc docker-buildx podman-docker containerd runc; do
+	if dpkg-query -W -f='${db:Status-Abbrev}' "$package" 2>/dev/null | grep -q '^ii'; then
+		conflicts+=("$package")
+	fi
 done
+if [ "${#conflicts[@]}" -gt 0 ]; then
+	apt_get remove -y "${conflicts[@]}"
+fi
 
 # Set up repository
 echo -e "\n\nSetting up dependencies to install docker repository keys\n\n"
@@ -95,3 +81,5 @@ configure_docker_access
 echo -e "\nStarting docker daemon\n"
 sudo systemctl enable --now docker.service
 sudo docker version
+sudo docker compose version
+sudo docker buildx version

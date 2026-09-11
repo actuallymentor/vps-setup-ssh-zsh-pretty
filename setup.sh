@@ -2,7 +2,50 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-SILENT_INSTALL=${1:-}
+# shellcheck source=common.sh
+source "$SCRIPT_DIR/common.sh"
+SILENT_INSTALL=""
+PROMPT_SETTINGS=y
+
+case "${1:-}" in
+"") ;;
+true)
+	SILENT_INSTALL=true
+	PROMPT_SETTINGS=n
+	;;
+--noninteractive) PROMPT_SETTINGS=n ;;
+--help | -h)
+	echo "Usage: bash setup.sh [--noninteractive|true]"
+	echo "--noninteractive: use environment settings without prompts"
+	echo "true: legacy silent mode; skip firewall and nonroot user"
+	exit 0
+	;;
+*)
+	echo "Unknown argument: $1"
+	exit 1
+	;;
+esac
+
+if [ "$#" -gt 1 ]; then
+	echo "Expected at most one argument"
+	exit 1
+fi
+
+# Fail before touching SSH, packages, or mounts on unsupported hosts.
+# shellcheck disable=SC1091
+source /etc/os-release
+if [ "$ID" != ubuntu ] || [[ "$VERSION_ID" != 24.04 && "$VERSION_ID" != 26.04 ]]; then
+	echo "Supported systems: Ubuntu 24.04 and 26.04 LTS"
+	exit 1
+fi
+
+validate_ssh_key
+
+# Mounting tmpfs would hide the remaining scripts and break a run from /tmp.
+if [[ "$SCRIPT_DIR" == /tmp || "$SCRIPT_DIR" == /tmp/* ]]; then
+	echo "Run setup outside /tmp (for example, from your home directory)"
+	exit 1
+fi
 
 AUTO_REBOOT_AT_UPGRADE=${AUTO_REBOOT_AT_UPGRADE:-}
 SSH_PORT=${SSH_PORT:-}
@@ -22,10 +65,8 @@ cleanup() {
 
 trap cleanup EXIT
 
-# Check if a silent install was requested
-if [ "$SILENT_INSTALL" ]; then
-	echo "Silent install requested, using defaults"
-else
+# Ask for settings unless unattended setup was requested.
+if [ "$PROMPT_SETTINGS" = y ]; then
 	# Settings
 	echo "Do you want to automatically reboot after an auto-upgrade? [true/false] (default true)"
 	read -r AUTO_REBOOT_AT_UPGRADE
@@ -66,7 +107,7 @@ if [ "$AUTO_REBOOT_AT_UPGRADE" != "true" ] && [ "$AUTO_REBOOT_AT_UPGRADE" != "fa
 	exit 1
 fi
 
-# Check if the non-route, SSH user should be able to SSH into the machine
+# Check if the nonroot SSH user should be able to SSH into the machine
 if [ "$NONROOT_SSH" != "y" ] && [ "$NONROOT_SSH" != "n" ]; then
 	echo "NONROOT_SSH must be y or n"
 	exit 1
@@ -83,39 +124,39 @@ if [ "$NONINTERACTIVE" != "y" ] && [ "$NONINTERACTIVE" != "n" ]; then
 	exit 1
 fi
 
-# Check if the SSH port is a number
-if ! [[ "$SSH_PORT" =~ ^[0-9]+$ ]]; then
-	echo "SSH_PORT must be a number"
-	exit 1
+validate_ssh_port
+
+# Legacy silent mode intentionally skips user creation.
+if [ "$SILENT_INSTALL" ]; then
+	NONROOT_USERNAME=""
 fi
 
-# Check if the SSH port is between 1 and 65535
-if [ "$SSH_PORT" -lt 1 ] || [ "$SSH_PORT" -gt 65535 ]; then
-	echo "SSH_PORT must be between 1 and 65535"
-	exit 1
-fi
+if [ "$NONROOT_USERNAME" ]; then
+	if ! [[ "$NONROOT_USERNAME" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
+		echo "NONROOT_USERNAME must be a valid Ubuntu username (up to 32 characters)"
+		exit 1
+	fi
 
+	if [ "$NONROOT_USERNAME" = "$(id -un)" ] || [ "$NONROOT_USERNAME" = "${SUDO_USER:-root}" ] ||
+		{ id "$NONROOT_USERNAME" &>/dev/null && [ "$(id -u "$NONROOT_USERNAME")" -lt 1000 ]; }; then
+		echo "Choose a nonroot user other than the current login or a system account"
+		exit 1
+	fi
 
-if [ ! "$SILENT_INSTALL" ]; then
-	# Check if the nonroot user is alphanumeric if it exists
-	if [ "$NONROOT_USERNAME" ]; then
-		if ! [[ "$NONROOT_USERNAME" =~ ^[a-z_][a-z0-9_-]*\$?$ ]]; then
-			echo "NONROOT_USERNAME must be a valid Ubuntu username"
-			exit 1
-		fi
+	if ! id "$NONROOT_USERNAME" &>/dev/null && [ ${#NONROOT_PASSWORD} -lt 8 ]; then
+		echo "NONROOT_PASSWORD must be at least 8 characters for a new user"
+		exit 1
+	fi
 
-		# Check if the nonroot password is valid if it is set
-		if [ ${#NONROOT_PASSWORD} -lt 8 ]; then
-			echo "NONROOT_PASSWORD must be at least 8 characters"
-			exit 1
-		fi
+	if [[ "$NONROOT_PASSWORD" == *$'\n'* || "$NONROOT_PASSWORD" == *$'\r'* ]]; then
+		echo "NONROOT_PASSWORD must not contain newlines"
+		exit 1
 	fi
 fi
 
-
-# Set noninteractivity if requested
-if [ "$NONINTERACTIVE" == "y" ]; then
-	export DEBIAN_FRONTEND=noninteractive
+if [ "$PROMPT_SETTINGS" = n ] && [ "$NONINTERACTIVE" != y ]; then
+	echo "Unattended setup requires NONINTERACTIVE=y"
+	exit 1
 fi
 
 # If SILENT_INSTALL, set firewall to n
@@ -132,7 +173,10 @@ fi
 
 # Activate sudo
 sudo -v
-(while true; do sudo -n true; sleep 30; done) &
+(while true; do
+	sudo -n true
+	sleep 30
+done) &
 SUDO_PID=$!
 
 ## SSH key
@@ -164,3 +208,5 @@ source "$SCRIPT_DIR/06-security.sh"
 
 ## Install docker
 source "$SCRIPT_DIR/07-docker.sh"
+
+echo "Setup complete (SSH TCP $SSH_PORT; Mosh UDP 60000:61000)"
