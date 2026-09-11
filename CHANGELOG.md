@@ -10,7 +10,7 @@
 
 ### Fixed
 
-- allow DHCPv4/v6 client renewal through bidirectional UFW (pending)
+- allow DHCPv4/v6 client renewal through bidirectional UFW (5e930ee)
 
 - support empty UFW rulesets and reject reserved accounts (75194ee)
 - replace manually stored SSH denies before enabling UFW (5d3e990)
