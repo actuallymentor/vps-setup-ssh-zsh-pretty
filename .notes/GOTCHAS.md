@@ -8,4 +8,5 @@
 - Switching away from SSH socket activation requires a service restart to discard inherited listeners; a reload can retain the old port.
 - Stage remote audit copies under a home directory, replace their `key.pub` with the audit public key, and never transfer or commit `.ssh_key`.
 - UFW `insert 1` rejects an empty ruleset; `prepend` supports fresh installs.
-- Disabled UFW retains rules; clear a stored deny for the chosen SSH port before enabling the firewall.
+- Disabled UFW retains manually configured rules too; clear a stored deny for the chosen SSH port before enabling the firewall.
+- Successful DHCP boot does not prove renewal works: systemd uses ordinary UDP for renewal, requiring outbound client rules under UFW deny-outgoing.

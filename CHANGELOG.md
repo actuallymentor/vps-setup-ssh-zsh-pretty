@@ -10,8 +10,10 @@
 
 ### Fixed
 
+- allow DHCPv4/v6 client renewal through bidirectional UFW (pending)
+
 - support empty UFW rulesets and reject reserved accounts (75194ee)
-- replace stored SSH denies when enabling an inactive firewall (pending)
+- replace manually stored SSH denies before enabling UFW (5d3e990)
 
 - open changed SSH ports before replacing listeners (80b04c7)
 - restart SSH to discard inherited listeners (80b04c7)

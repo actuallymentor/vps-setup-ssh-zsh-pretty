@@ -50,9 +50,9 @@ mosh --ssh="ssh -p 2222" user@server
 ```
 
 Configured UFW policies allow incoming UDP `60000:61000`. Bidirectional mode
-also permits replies from that source-port range, DNS, NTP, NTS key exchange
-(TCP `4460`), and HTTP(S). Add the same incoming UDP range to any provider
-firewall. Silent mode and `FIREWALL=n` leave Mosh firewall rules to you.
+also permits replies from that source-port range, DHCPv4/v6 clients
+(UDP `68→67` / `546→547`), DNS, NTP, NTS key exchange (TCP `4460`), and HTTP(S).
+Add the same incoming UDP range to any provider firewall. Silent mode and `FIREWALL=n` leave Mosh firewall rules to you.
 
 ## Verification
 

@@ -72,3 +72,19 @@ for username in root nobody _audit; do
 	fi
 done
 echo 'PASS unsafe account preflight'
+
+NONROOT_USERNAME="audit-test-$RANDOM-$$"
+for password in 1234567 $'12345678\n'; do
+	if (
+		NONROOT_PASSWORD=$password
+		validate_nonroot_user
+	) >/dev/null 2>&1; then
+		echo 'FAIL accepted invalid password for a new user'
+		exit 1
+	fi
+done
+(
+	NONROOT_PASSWORD=12345678
+	validate_nonroot_user
+)
+echo 'PASS new account password validation and valid account accepted'

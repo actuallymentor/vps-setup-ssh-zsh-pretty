@@ -90,6 +90,9 @@ if [ "$FIREWALL" != "n" ]; then
 		sudo ufw default deny incoming comment 'deny all incoming traffic'
 		# Allow specific things
 		sudo ufw allow out 53 comment 'allow DNS calls out'
+		# DHCP renewal uses UDP sockets even when initial discovery bypasses UFW.
+		sudo ufw allow out proto udp from any port 68 to any port 67 comment 'Allow DHCPv4 client'
+		sudo ufw allow out proto udp from any port 546 to any port 547 comment 'Allow DHCPv6 client'
 		sudo ufw allow out 123/udp comment 'allow NTP out'
 		sudo ufw allow out 4460/tcp comment 'allow NTS key exchange out'
 		sudo ufw allow out http comment 'allow HTTP traffic out'   # apt is likely to use these

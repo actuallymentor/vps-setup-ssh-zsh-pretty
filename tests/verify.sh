@@ -57,6 +57,8 @@ if [ "$FIREWALL" != n ]; then
 	if [ "$FIREWALL" = bidirectional ]; then
 		check 'outgoing denied' grep -q 'deny (outgoing)' <<<"$firewall_status"
 		check 'Mosh replies allowed' grep -Eq 'ALLOW OUT[[:space:]]+60000:61000/udp' <<<"$firewall_status"
+		check 'DHCPv4 client allowed' grep -Eq '67/udp.*ALLOW OUT.*68/udp' <<<"$firewall_status"
+		check 'DHCPv6 client allowed' grep -Eq '547/udp.*ALLOW OUT.*546/udp' <<<"$firewall_status"
 		check 'NTS allowed' grep -Eq '4460/tcp[[:space:]]+ALLOW OUT' <<<"$firewall_status"
 	else
 		check 'outgoing allowed' grep -q 'allow (outgoing)' <<<"$firewall_status"
