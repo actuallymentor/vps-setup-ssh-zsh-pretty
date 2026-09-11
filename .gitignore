@@ -1,0 +1,3 @@
+# Local audit credentials.
+/.ssh_key
+/.ssh_key.pub
