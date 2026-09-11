@@ -117,6 +117,7 @@ if [ "$FIREWALL" != "n" ]; then
 
 	# Allow ssh access
 	echo "Allowing SSH on port $SSH_PORT/tcp"
+	sudo ufw --force delete deny "$SSH_PORT/tcp"
 	sudo ufw prepend allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
 	sudo ufw allow 60000:61000/udp comment 'Allow Mosh'
 

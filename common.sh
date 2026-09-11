@@ -28,3 +28,31 @@ validate_ssh_key() {
 		exit 1
 	fi
 }
+
+validate_nonroot_user() {
+	[ -n "$NONROOT_USERNAME" ] || return 0
+
+	if ! [[ "$NONROOT_USERNAME" =~ ^[a-z][a-z0-9_-]{0,31}$ ]]; then
+		echo "NONROOT_USERNAME must be a valid Ubuntu username (up to 32 characters)"
+		exit 1
+	fi
+
+	# Ubuntu regular accounts use UIDs 1000–60000; exclude nobody as well.
+	local nonroot_uid
+	nonroot_uid=$(id -u "$NONROOT_USERNAME" 2>/dev/null || true)
+	if [ "$NONROOT_USERNAME" = "$(id -un)" ] || [ "$NONROOT_USERNAME" = "${SUDO_USER:-root}" ] ||
+		{ [ -n "$nonroot_uid" ] && ((nonroot_uid < 1000 || nonroot_uid > 60000)); }; then
+		echo "Choose a nonroot user other than the current login or a system account"
+		exit 1
+	fi
+
+	if ! id "$NONROOT_USERNAME" &>/dev/null && [ ${#NONROOT_PASSWORD} -lt 8 ]; then
+		echo "NONROOT_PASSWORD must be at least 8 characters for a new user"
+		exit 1
+	fi
+
+	if [[ "$NONROOT_PASSWORD" == *$'\n'* || "$NONROOT_PASSWORD" == *$'\r'* ]]; then
+		echo "NONROOT_PASSWORD must not contain newlines"
+		exit 1
+	fi
+}

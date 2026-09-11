@@ -30,7 +30,7 @@ SSH_PORT=2222 FIREWALL=bidirectional bash setup.sh --noninteractive </dev/null
 | `SSH_PORT` | `22` | `1`–`65535` |
 | `FIREWALL` | `incoming` | `incoming`, `bidirectional`, `n` (leave policy alone) |
 | `AUTO_REBOOT_AT_UPGRADE` | `true` | `true`, `false` |
-| `NONROOT_USERNAME` | empty | Optional sudo user; lowercase initial letter, UID 1000–60000; not current login |
+| `NONROOT_USERNAME` | empty | Optional sudo user; lowercase initial letter; existing UID 1000–60000; not current login |
 | `NONROOT_PASSWORD` | empty | Required for a new user; at least 8 characters |
 | `NONROOT_SSH` | `y` | `y`, `n` |
 | `NONINTERACTIVE` | `y` | `y`, `n`; controls package/configuration prompts |

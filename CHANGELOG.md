@@ -10,7 +10,8 @@
 
 ### Fixed
 
-- support empty UFW rulesets and reject reserved nonroot accounts (pending)
+- support empty UFW rulesets and reject reserved accounts (75194ee)
+- replace stored SSH denies when enabling an inactive firewall (pending)
 
 - open changed SSH ports before replacing listeners (80b04c7)
 - restart SSH to discard inherited listeners (80b04c7)

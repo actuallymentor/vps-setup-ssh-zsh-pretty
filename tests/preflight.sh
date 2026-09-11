@@ -57,16 +57,18 @@ if bash setup.sh --typo >/dev/null 2>&1; then
 fi
 echo 'PASS CLI help and invalid arguments'
 
-# Exercise the whole preflight on supported hosts; each input must fail early.
-# shellcheck disable=SC1091
-source /etc/os-release
-if [ "$ID" = ubuntu ] && [[ "$VERSION_ID" == 24.04 || "$VERSION_ID" == 26.04 ]]; then
-	for username in root nobody _audit; do
-		if output=$(NONROOT_USERNAME=$username bash setup.sh --noninteractive 2>&1); then
-			echo "FAIL accepted unsafe username: $username"
-			exit 1
-		fi
-		grep -Eq 'valid Ubuntu username|Choose a nonroot user' <<<"$output"
-	done
-	echo 'PASS unsafe account preflight'
-fi
+for username in root nobody _audit; do
+	if output=$(
+		NONROOT_USERNAME=$username
+		NONROOT_PASSWORD=''
+		validate_nonroot_user
+	); then
+		echo "FAIL accepted unsafe username: $username"
+		exit 1
+	fi
+	if ! grep -Eq 'valid Ubuntu username|Choose a nonroot user' <<<"$output"; then
+		printf 'FAIL unexpected preflight output for %s:\n%s\n' "$username" "$output"
+		exit 1
+	fi
+done
+echo 'PASS unsafe account preflight'
