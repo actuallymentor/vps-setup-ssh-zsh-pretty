@@ -21,7 +21,8 @@ Additional checks: interactive nonroot setup skips account prompts; keys with
 no final newline survive; repeated installs leave one copy of each key; sudo
 runs install keys for the login account without adding them to root. Ubuntu 26
 also verifies removal of the invoking account's managed SSH deny while
-preserving another account's deny.
+preserving another account's deny. Both VPSes also verify migration of legacy
+shared deny snippets for the invoking account and for another account.
 
 Found and fixed: Ubuntu 26 `sudo-rs` rejects noninteractive `sudo -v` despite
 NOPASSWD privileges. Probe `sudo -n true` before requesting authentication.

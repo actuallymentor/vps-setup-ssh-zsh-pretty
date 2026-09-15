@@ -62,6 +62,19 @@ install_ssh_key() {
 	sudo chmod 600 "$keys"
 }
 
+# Migrate the old shared snippet without losing another user's restriction.
+migrate_ssh_deny() {
+	local legacy_deny legacy_user
+
+	legacy_deny=/etc/ssh/sshd_config.d/15-vps-setup-deny-users.conf
+	if sudo test -f "$legacy_deny"; then
+		legacy_user=$(sudo awk '$1 == "DenyUsers" && NF == 2 { print $2 }' "$legacy_deny")
+		if [[ "$legacy_user" =~ ^[a-z_][a-z0-9_-]{0,31}$ && "$legacy_user" != users ]]; then
+			sudo mv "$legacy_deny" "/etc/ssh/sshd_config.d/15-vps-setup-deny-$legacy_user.conf"
+		fi
+	fi
+}
+
 validate_nonroot_user() {
 	[ -n "$NONROOT_USERNAME" ] || return 0
 

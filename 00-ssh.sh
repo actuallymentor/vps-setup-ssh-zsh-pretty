@@ -54,6 +54,7 @@ fi
 ssh_user=$(setup_user)
 install_ssh_key "$ssh_user"
 # A previous root run may have disabled this account's SSH access.
+migrate_ssh_deny
 sudo rm -f "/etc/ssh/sshd_config.d/15-vps-setup-deny-$ssh_user.conf"
 
 # Ubuntu includes sshd_config.d snippets before the main file; most sshd

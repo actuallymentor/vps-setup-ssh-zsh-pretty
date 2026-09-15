@@ -4,8 +4,8 @@
 
 ### Fixed
 
+- migrate legacy SSH denies before repairing nonroot access (pending)
 - support passwordless nonroot setup with Ubuntu 26 sudo-rs (pending)
-
 - reuse the invoking nonroot account, including through sudo (pending)
 - install SSH keys with correct ownership; preserve existing keys (pending)
 - configure Zsh and Docker for the same invoking account (pending)
