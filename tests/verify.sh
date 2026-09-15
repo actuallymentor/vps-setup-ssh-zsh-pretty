@@ -69,6 +69,12 @@ if [ -n "${NONROOT_USERNAME:-}" ]; then
 	check 'nonroot sudo membership' grep -qw sudo <<<"$(id -nG "$NONROOT_USERNAME")"
 	check 'nonroot Docker membership' grep -qw docker <<<"$(id -nG "$NONROOT_USERNAME")"
 	check 'nonroot zsh' test "$(getent passwd "$NONROOT_USERNAME" | cut -d: -f7)" = /usr/bin/zsh
+	if [ "${NONROOT_SSH:-y}" = y ]; then
+		userhome=$(getent passwd "$NONROOT_USERNAME" | cut -d: -f6)
+		check 'nonroot SSH directory ownership/mode' test "$(stat -c '%U:%a' "$userhome/.ssh")" = "$NONROOT_USERNAME:700"
+		check 'nonroot SSH key ownership/mode' test "$(stat -c '%U:%a' "$userhome/.ssh/authorized_keys")" = "$NONROOT_USERNAME:600"
+		check 'nonroot authorized keys valid' ssh-keygen -lf "$userhome/.ssh/authorized_keys"
+	fi
 fi
 
 check 'Docker Compose' docker compose version

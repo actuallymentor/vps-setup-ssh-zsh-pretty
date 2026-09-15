@@ -55,6 +55,7 @@ NONROOT_SSH=${NONROOT_SSH:-}
 FIREWALL=${FIREWALL:-}
 NONINTERACTIVE=${NONINTERACTIVE:-}
 SUDO_PID=""
+SETUP_USER=$(setup_user)
 
 cleanup() {
 	if [ -n "$SUDO_PID" ] && kill -0 "$SUDO_PID" 2>/dev/null; then
@@ -74,16 +75,18 @@ if [ "$PROMPT_SETTINGS" = y ]; then
 	echo "What SSH port do you want to configure? (default 22)"
 	read -r SSH_PORT
 
-	echo "What username should the non root sudo user have? (empty for none)"
-	read -r NONROOT_USERNAME
+	if [ "$SETUP_USER" = root ]; then
+		echo "What username should the non root sudo user have? (empty for none)"
+		read -r NONROOT_USERNAME
 
-	if [ "$NONROOT_USERNAME" ]; then
-		echo "What password should this user have?"
-		read -rs NONROOT_PASSWORD
-		echo
+		if [ "$NONROOT_USERNAME" ]; then
+			echo "What password should this user have?"
+			read -rs NONROOT_PASSWORD
+			echo
 
-		echo "Should the nonroot user be able to SSH into the machine? [y/n] (default y)"
-		read -r NONROOT_SSH
+			echo "Should the nonroot user be able to SSH into the machine? [y/n] (default y)"
+			read -r NONROOT_SSH
+		fi
 	fi
 
 	echo "Should I set up a firewall? [incoming/bidirectional/n] (default incoming)"
@@ -100,6 +103,13 @@ NONROOT_SSH=${NONROOT_SSH:-y}
 SSH_PORT=${SSH_PORT:-22}
 FIREWALL=${FIREWALL:-incoming}
 NONINTERACTIVE=${NONINTERACTIVE:-y}
+
+# A nonroot login already has an account; ignore new-account settings.
+if [ "$SETUP_USER" != root ] || [ "$SILENT_INSTALL" ]; then
+	NONROOT_USERNAME=""
+	NONROOT_PASSWORD=""
+	NONROOT_SSH=y
+fi
 
 # validate that all inputs are correct
 if [ "$AUTO_REBOOT_AT_UPGRADE" != "true" ] && [ "$AUTO_REBOOT_AT_UPGRADE" != "false" ]; then
@@ -126,11 +136,6 @@ fi
 
 validate_ssh_port
 
-# Legacy silent mode intentionally skips user creation.
-if [ "$SILENT_INSTALL" ]; then
-	NONROOT_USERNAME=""
-fi
-
 validate_nonroot_user
 
 if [ "$PROMPT_SETTINGS" = n ] && [ "$NONINTERACTIVE" != y ]; then
@@ -150,8 +155,8 @@ if ! grep -Fq "127.0.0.1 $server_hostname" /etc/hosts; then
 	echo "127.0.0.1 $server_hostname" | sudo tee -a /etc/hosts >/dev/null
 fi
 
-# Activate sudo
-sudo -v
+# sudo-rs may require a password for -v even with NOPASSWD access.
+sudo -n true 2>/dev/null || sudo -v
 (while true; do
 	sudo -n true
 	sleep 30

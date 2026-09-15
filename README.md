@@ -13,6 +13,12 @@ bash setup.sh
 cd .. && rm -rf ./setup
 ```
 
+Non-root runs reuse the invoking sudo-capable account, including `sudo bash
+setup.sh`. User-creation prompts and `NONROOT_*` settings are skipped. Setup
+installs `key.pub` for that account, repairs SSH file ownership/permissions,
+and configures its Zsh and Docker access. Existing keys and passwords stay intact.
+Unattended non-root runs require passwordless sudo (or an existing sudo ticket).
+
 Legacy silent mode skips firewall configuration and nonroot user creation:
 
 ```
@@ -30,7 +36,7 @@ SSH_PORT=2222 FIREWALL=bidirectional bash setup.sh --noninteractive </dev/null
 | `SSH_PORT` | `22` | `1`–`65535` |
 | `FIREWALL` | `incoming` | `incoming`, `bidirectional`, `n` (leave policy alone) |
 | `AUTO_REBOOT_AT_UPGRADE` | `true` | `true`, `false` |
-| `NONROOT_USERNAME` | empty | Optional sudo user; lowercase initial letter; existing UID 1000–60000; not current login |
+| `NONROOT_USERNAME` | empty | Root runs only; optional sudo user; lowercase initial letter; existing UID 1000–60000; not current login |
 | `NONROOT_PASSWORD` | empty | Required for a new user; at least 8 characters |
 | `NONROOT_SSH` | `y` | `y`, `n` |
 | `NONINTERACTIVE` | `y` | `y`, `n`; controls package/configuration prompts |

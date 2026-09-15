@@ -50,8 +50,6 @@ sudo chsh -s "$(command -v zsh)" "$NONROOT_USERNAME"
 
 # Oh my zsh for subuser
 installOhMyZSH "$NONROOT_USERNAME"
-userhome=$(getent passwd "$NONROOT_USERNAME" | cut -d: -f6)
-usergroup=$(id -gn "$NONROOT_USERNAME")
 
 # Migrate the old shared snippet without losing another user's restriction.
 legacy_deny=/etc/ssh/sshd_config.d/15-vps-setup-deny-users.conf
@@ -69,20 +67,7 @@ if [ "$NONROOT_SSH" = "n" ]; then
 else
 	# add the ssh key to this user as well
 	sudo rm -f "$SSH_DENY_CONFIG"
-	sudo install -d -m 700 -o "$NONROOT_USERNAME" -g "$usergroup" "$userhome/.ssh"
-	# Preserve keys already installed for this user.
-	keys="$userhome/.ssh/authorized_keys"
-	sudo touch "$keys"
-	if sudo test -s "$keys" && [ -n "$(sudo tail -c 1 "$keys")" ]; then
-		printf '\n' | sudo tee -a "$keys" >/dev/null
-	fi
-	while IFS= read -r public_key || [ -n "$public_key" ]; do
-		if [ -n "$public_key" ] && ! sudo grep -qxF "$public_key" "$keys"; then
-			printf '%s\n' "$public_key" | sudo tee -a "$keys" >/dev/null
-		fi
-	done <"$SCRIPT_DIR/key.pub"
-	sudo chown "$NONROOT_USERNAME:$usergroup" "$keys"
-	sudo chmod 600 "$keys"
+	install_ssh_key "$NONROOT_USERNAME"
 	reload_ssh_access
 fi
 

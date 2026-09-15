@@ -8,7 +8,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 
 # Install zsh and dependencies used by this script
 apt_get install -y zsh git curl
-sudo usermod -s "$(command -v zsh)" "$(id -un)"
+sudo usermod -s "$(command -v zsh)" "$(setup_user)"
 
 # Recyclable zsh install function for use here and in the nonroot user section
 function installOhMyZSH() {
@@ -62,4 +62,4 @@ EOF
 }
 
 # Install for current user
-installOhMyZSH "$(id -un)"
+installOhMyZSH "$(setup_user)"

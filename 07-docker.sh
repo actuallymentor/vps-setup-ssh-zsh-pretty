@@ -7,7 +7,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 configure_docker_access() {
 	local current_user
 
-	current_user=${SUDO_USER:-${USER:-$(id -un)}}
+	current_user=$(setup_user)
 	echo -e "\nAdding user $current_user to docker group\n"
 	sudo groupadd docker &>/dev/null || true
 	sudo usermod -aG docker "$current_user"

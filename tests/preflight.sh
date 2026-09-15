@@ -88,3 +88,27 @@ done
 	validate_nonroot_user
 )
 echo 'PASS new account password validation and valid account accepted'
+
+# Identity must survive sudo's HOME reset, without trusting stale SUDO_USER
+# when the process is already unprivileged. Live VPS runs cover real logins.
+(
+	id() {
+		case "$1" in
+		-u) echo "$fixture_uid" ;;
+		-un) echo "$fixture_user" ;;
+		esac
+	}
+	fixture_uid=1000 fixture_user=admin
+	unset SUDO_USER
+	[ "$(setup_user)" = admin ]
+	SUDO_USER=other
+	[ "$(setup_user)" = admin ]
+	fixture_uid=0 fixture_user=root
+	SUDO_USER="admin"
+	[ "$(setup_user)" = admin ]
+	SUDO_USER=root
+	[ "$(setup_user)" = root ]
+	unset SUDO_USER
+	[ "$(setup_user)" = root ]
+)
+echo 'PASS direct and sudo invoking account selection'

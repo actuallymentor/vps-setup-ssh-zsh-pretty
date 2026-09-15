@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] - 2026-09-15
+
+### Fixed
+
+- support passwordless nonroot setup with Ubuntu 26 sudo-rs (pending)
+
+- reuse the invoking nonroot account, including through sudo (pending)
+- install SSH keys with correct ownership; preserve existing keys (pending)
+- configure Zsh and Docker for the same invoking account (pending)
+
 ## [Unreleased] - 2026-09-11
 
 ### Added

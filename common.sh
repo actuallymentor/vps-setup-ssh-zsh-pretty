@@ -29,6 +29,39 @@ validate_ssh_key() {
 	fi
 }
 
+# sudo preserves the login identity even when HOME points at /root.
+setup_user() {
+	if [ "$(id -u)" = 0 ] && [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != root ]; then
+		printf '%s\n' "$SUDO_USER"
+	else
+		id -un
+	fi
+}
+
+install_ssh_key() {
+	local username=$1
+	local userhome usergroup keys public_key
+
+	userhome=$(getent passwd "$username" | cut -d: -f6)
+	usergroup=$(id -gn "$username")
+	[ -n "$userhome" ] || return 1
+	keys="$userhome/.ssh/authorized_keys"
+
+	sudo install -d -m 700 -o "$username" -g "$usergroup" "$userhome/.ssh"
+	sudo touch "$keys"
+	# Preserve existing keys, including a final line without a newline.
+	if sudo test -s "$keys" && [ -n "$(sudo tail -c 1 "$keys")" ]; then
+		printf '\n' | sudo tee -a "$keys" >/dev/null
+	fi
+	while IFS= read -r public_key || [ -n "$public_key" ]; do
+		if [ -n "$public_key" ] && ! sudo grep -qxF "$public_key" "$keys"; then
+			printf '%s\n' "$public_key" | sudo tee -a "$keys" >/dev/null
+		fi
+	done <"$SCRIPT_DIR/key.pub"
+	sudo chown "$username:$usergroup" "$keys"
+	sudo chmod 600 "$keys"
+}
+
 validate_nonroot_user() {
 	[ -n "$NONROOT_USERNAME" ] || return 0
 

@@ -10,3 +10,4 @@
 - UFW `insert 1` rejects an empty ruleset; `prepend` supports fresh installs.
 - Disabled UFW retains manually configured rules too; clear a stored deny for the chosen SSH port before enabling the firewall.
 - Successful DHCP boot does not prove renewal works: systemd uses ordinary UDP for renewal, requiring outbound client rules under UFW deny-outgoing.
+- Ubuntu 26 sudo-rs can reject `sudo -v` without a terminal despite NOPASSWD access; probe `sudo -n true` before requesting a ticket.

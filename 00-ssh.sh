@@ -6,7 +6,6 @@ SSH_PORT=${SSH_PORT:-22}
 SCRIPT_DIR="${SCRIPT_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}"
 SSH_CONFIG="/etc/ssh/sshd_config.d/10-vps-setup.conf"
 SSH_SOCKET_CONFIG="/etc/systemd/system/ssh.socket.d/10-vps-setup.conf"
-AUTHORIZED_KEYS="$HOME/.ssh/authorized_keys"
 # shellcheck source=common.sh
 source "$SCRIPT_DIR/common.sh"
 validate_ssh_port
@@ -51,21 +50,11 @@ if command -v ufw >/dev/null && sudo ufw status | grep -q '^Status: active'; the
 	sudo ufw prepend allow "$SSH_PORT/tcp" comment 'Allow ssh on custom port'
 fi
 
-# SSH Setup
-install -d -m 700 "$HOME/.ssh"
-touch "$AUTHORIZED_KEYS"
-chmod 600 "$AUTHORIZED_KEYS"
-
-# Separate an existing final line that has no newline before appending keys.
-if [ -s "$AUTHORIZED_KEYS" ] && [ -n "$(tail -c 1 "$AUTHORIZED_KEYS")" ]; then
-	printf '\n' >>"$AUTHORIZED_KEYS"
-fi
-
-while IFS= read -r public_key || [ -n "$public_key" ]; do
-	if [ -n "$public_key" ] && ! grep -qxF "$public_key" "$AUTHORIZED_KEYS"; then
-		printf '%s\n' "$public_key" >>"$AUTHORIZED_KEYS"
-	fi
-done <"$SCRIPT_DIR/key.pub"
+# Always authorize the invoking account, including runs through sudo.
+ssh_user=$(setup_user)
+install_ssh_key "$ssh_user"
+# A previous root run may have disabled this account's SSH access.
+sudo rm -f "/etc/ssh/sshd_config.d/15-vps-setup-deny-$ssh_user.conf"
 
 # Ubuntu includes sshd_config.d snippets before the main file; most sshd
 # directives use the first value found, so an early snippet wins cleanly.
